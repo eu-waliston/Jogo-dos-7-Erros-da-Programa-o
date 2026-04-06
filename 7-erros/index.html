@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Jogo dos 7 Erros da Programação - Tela de Parabéns</title>
+    <link rel="stylesheet" href="style/styles.css">
+</head>
+<body>
+<div class="game-container">
+    <div class="game-panel">
+        <div class="header">
+            <div class="title">
+                <h1>🐞 JOGO DOS 7 ERROS · DEV</h1>
+                <p>clique nos círculos VERMELHOS em cima dos erros</p>
+            </div>
+            <div class="stats">
+                <div class="stat"><div class="stat-value" id="errorsFound">0</div><div class="stat-label">erros</div></div>
+                <div class="stat"><div class="stat-value" id="errorsRemaining">7</div><div class="stat-label">restantes</div></div>
+                <div class="stat"><div class="stat-value" id="attemptCounter">0</div><div class="stat-label">tentativas</div></div>
+                <div class="level-badge" id="levelName">INICIANTE</div>
+            </div>
+        </div>
+
+        <div class="canvas-area">
+            <div class="code-card">
+                <h3>✅ CÓDIGO CORRETO</h3>
+                <canvas id="canvasCorrect" width="700" height="500"></canvas>
+            </div>
+            <div class="code-card">
+                <h3>❌ CÓDIGO COM ERROS (CLIQUE NOS CÍRCULOS)</h3>
+                <canvas id="canvasErros" width="700" height="500"></canvas>
+            </div>
+        </div>
+
+        <div class="feedback-area" id="feedbackMsg">
+            <span class="message">🔴 CLIQUE NOS CÍRCULOS VERMELHOS exatamente em cima de cada erro!</span>
+        </div>
+
+        <div class="controls">
+            <button id="nextLevelBtn" disabled>➡️ PRÓXIMO NÍVEL</button>
+            <button id="resetBtn" class="reset-btn">🔄 REINICIAR</button>
+            <button id="forceHelpBtn" class="help-btn">🔘 MOSTRA/ESCONDE CÍRCULOS</button>
+        </div>
+    </div>
+</div>
+
+<!-- TELA DE PARABÉNS (inicialmente escondida) -->
+<div id="congratsOverlay" class="congrats-overlay hidden">
+    <div class="congrats-card">
+        <div class="trophy-icon">🏆</div>
+        <h1>PARABÉNS!</h1>
+        <h2 id="congratsLevelName">INICIANTE</h2>
+        <p style="color: #94a3b8;">Você encontrou todos os erros de programação!</p>
+        
+        <div class="errors-list">
+            <h3>📋 ERROS CORRIGIDOS:</h3>
+            <div id="errorsListContainer"></div>
+        </div>
+        
+        <div style="margin-top: 20px;">
+            <p style="color: #facc15; font-size: 1.2rem;">🎯 Tentativas: <span id="congratsAttempts">0</span></p>
+        </div>
+        
+        <button id="congratsNextBtn" class="congrats-btn">➡️ AVANÇAR PARA PRÓXIMO NÍVEL</button>
+        <button id="congratsResetBtn" style="margin-top: 10px; background: #4a2f3d;">🔄 REINICIAR JOGO</button>
+    </div>
+</div>
+
+<script src="script/script.js"></script>
+</body>
+</html>

@@ -1,0 +1,356 @@
+* {
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+body {
+    background: linear-gradient(135deg, #0a0f1e 0%, #0c1222 100%);
+    font-family: 'Segoe UI', 'Fira Code', 'Courier New', monospace;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+    padding: 20px;
+}
+
+.game-container {
+    background: rgba(18, 25, 45, 0.7);
+    backdrop-filter: blur(2px);
+    border-radius: 48px;
+    padding: 20px 25px 30px 25px;
+    box-shadow: 0 20px 35px rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(72, 187, 255, 0.3);
+}
+
+.game-panel {
+    background: #0f172a;
+    border-radius: 32px;
+    padding: 20px;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+    gap: 15px;
+    background: #1e293b;
+    padding: 12px 20px;
+    border-radius: 60px;
+}
+
+.title h1 {
+    margin: 0;
+    font-size: 1.6rem;
+    background: linear-gradient(135deg, #7dd3fc, #2dd4bf);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+
+.title p {
+    margin: 0;
+    font-size: 0.7rem;
+    color: #94a3b8;
+}
+
+.stats {
+    display: flex;
+    gap: 25px;
+    background: #0f172a;
+    padding: 5px 20px;
+    border-radius: 40px;
+}
+
+.stat {
+    text-align: center;
+}
+
+.stat-value {
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: #facc15;
+    line-height: 1;
+}
+
+.stat-label {
+    font-size: 0.7rem;
+    color: #cbd5e1;
+    text-transform: uppercase;
+}
+
+.level-badge {
+    background: #2d3a5e;
+    padding: 6px 18px;
+    border-radius: 30px;
+    font-weight: bold;
+    color: #b9e0ff;
+    border-left: 3px solid #38bdf8;
+}
+
+.canvas-area {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 25px;
+    margin: 20px 0;
+}
+
+.code-card {
+    background: #0a0f1e;
+    border-radius: 24px;
+    padding: 15px;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+}
+
+.code-card h3 {
+    text-align: center;
+    margin: 0 0 12px 0;
+    font-size: 1rem;
+    color: #a5f3fc;
+}
+
+canvas {
+    display: block;
+    margin: 0 auto;
+    border-radius: 20px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+    cursor: pointer;
+    background: #010409;
+    width: 100%;
+    height: auto;
+}
+
+#canvasCorrect,
+#canvasErros {
+    width: 100%;
+    height: auto;
+    max-width: 700px;
+}
+
+.feedback-area {
+    background: #1e293b;
+    border-radius: 40px;
+    padding: 12px 20px;
+    margin-top: 20px;
+    text-align: center;
+    min-height: 85px;
+}
+
+.message {
+    color: #e2e8f0;
+    font-size: 0.95rem;
+}
+
+.message.success {
+    color: #4ade80;
+}
+
+.message.error {
+    color: #f87171;
+}
+
+.message.warning {
+    color: #fbbf24;
+}
+
+.controls {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 20px;
+    flex-wrap: wrap;
+}
+
+button {
+    background: #2d3e6e;
+    border: none;
+    font-family: monospace;
+    font-weight: bold;
+    padding: 10px 24px;
+    border-radius: 40px;
+    color: white;
+    cursor: pointer;
+    transition: 0.2s;
+    font-size: 0.9rem;
+}
+
+button:hover {
+    background: #3b5290;
+    transform: scale(0.97);
+}
+
+.reset-btn {
+    background: #4a2f3d;
+}
+
+.reset-btn:hover {
+    background: #6b3e52;
+}
+
+.help-btn {
+    background: #b45309;
+}
+
+.help-btn:hover {
+    background: #c2410c;
+}
+
+/* TELA DE PARABÉNS */
+.congrats-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.95);
+    backdrop-filter: blur(10px);
+    z-index: 1000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    animation: fadeIn 0.5s ease;
+}
+
+.congrats-card {
+    background: linear-gradient(135deg, #1e293b, #0f172a);
+    border-radius: 48px;
+    max-width: 600px;
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+    padding: 30px;
+    text-align: center;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    border: 2px solid #facc15;
+    animation: slideUp 0.5s ease;
+}
+
+.congrats-card h1 {
+    font-size: 3rem;
+    background: linear-gradient(135deg, #facc15, #fbbf24);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    margin: 0 0 10px 0;
+}
+
+.congrats-card h2 {
+    color: #7dd3fc;
+    font-size: 1.5rem;
+    margin: 10px 0;
+}
+
+.trophy-icon {
+    font-size: 5rem;
+    animation: bounce 1s infinite;
+}
+
+.errors-list {
+    background: #010409;
+    border-radius: 24px;
+    padding: 20px;
+    margin: 20px 0;
+    text-align: left;
+}
+
+.errors-list h3 {
+    color: #facc15;
+    margin: 0 0 15px 0;
+    text-align: center;
+}
+
+.error-item {
+    background: #1e293b;
+    margin: 10px 0;
+    padding: 12px 15px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    animation: slideIn 0.3s ease;
+    animation-fill-mode: both;
+}
+
+.error-number {
+    background: #22c55e;
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 1.2rem;
+    color: white;
+}
+
+.error-text {
+    flex: 1;
+    color: #e2e8f0;
+    font-size: 0.9rem;
+}
+
+.congrats-btn {
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+    font-size: 1.2rem;
+    padding: 15px 40px;
+    margin-top: 20px;
+}
+
+.congrats-btn:hover {
+    transform: scale(1.05);
+    background: linear-gradient(135deg, #16a34a, #15803d);
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(50px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes bounce {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(-30px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+.hidden {
+    display: none !important;
+}
