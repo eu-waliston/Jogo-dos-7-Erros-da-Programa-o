@@ -158,7 +158,7 @@ else
     }
 
     function updateHelpButton() {
-        if (wrongAttempts >= 4 && !helpActivated && !levelCompleted) {
+        if (wrongAttempts >= 1 && !helpActivated && !levelCompleted) {
             forceHelpBtn.style.display = 'block';
             forceHelpBtn.disabled = false;
             forceHelpBtn.classList.add('visible');
