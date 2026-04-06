@@ -1,9 +1,9 @@
-
 (function () {
     // ========== DEFINIÇÃO DOS NÍVEIS ==========
     const levels = [
         {
-            name: "INICIANTE",
+            name: "PYTHON - INICIANTE",
+            language: "🐍 Python",
             correctCode: `def saudacao(nome):
     print("Olá, " + nome + "!")
     return True`,
@@ -21,7 +21,8 @@
             ]
         },
         {
-            name: "INTERMEDIÁRIO",
+            name: "PYTHON - INTERMEDIÁRIO",
+            language: "🐍 Python",
             correctCode: `idade = 18
 if idade >= 18:
     print("Maior de idade")
@@ -43,7 +44,8 @@ else
             ]
         },
         {
-            name: "AVANÇADO",
+            name: "PYTHON - AVANÇADO",
+            language: "🐍 Python",
             correctCode: `for i in range(3):
     print(f"Valor: {i}")
     if i == 1:
@@ -61,15 +63,66 @@ else
                 { line: 0, charPos: 14, explanation: "🔄 range(3) sem fechamento correto" },
                 { line: 1, charPos: 12, explanation: "🔁 Deveria usar f-string ao invés de concatenação" }
             ]
+        },
+        {
+            name: "HTML - BÁSICO",
+            language: "🌐 HTML",
+            correctCode: `<div class="container">
+    <h1>Bem-vindo ao Site</h1>
+    <p>Este é um parágrafo de exemplo</p>
+    <img src="foto.jpg" alt="Minha Foto">
+</div>`,
+            wrongCode: `<div class="container">
+    <h1>Bem-vindo ao Site</h2>
+    <p>Este é um parágrafo de exemplo
+    <img src="foto.jpg">
+</div>`,
+            errors: [
+                { line: 1, charPos: 28, explanation: "❌ Tag h1 fechada com /h2 (tag errada)" },
+                { line: 2, charPos: 37, explanation: "❌ Tag p não foi fechada corretamente" },
+                { line: 3, charPos: 20, explanation: "❌ Imagem sem atributo alt (acessibilidade)" },
+                { line: 0, charPos: 5, explanation: "📌 Classe container sem aspas? não" },
+                { line: 1, charPos: 10, explanation: "⚠️ Título com espaçamento incorreto" },
+                { line: 4, charPos: 0, explanation: "🔁 Div fechada mas estrutura confusa" },
+                { line: 2, charPos: 5, explanation: "🧩 Parágrafo sem conteúdo bem formatado" }
+            ]
+        },
+        {
+            name: "HTML - AVANÇADO",
+            language: "🌐 HTML",
+            correctCode: `<form action="/enviar" method="POST">
+    <label for="nome">Nome:</label>
+    <input type="text" id="nome" name="nome">
+    <button type="submit">Enviar</button>
+</form>`,
+            wrongCode: `<form action="/enviar" method=POST>
+    <label>Nome:</label>
+    <input type="text" id="nome" nome="nome">
+    <button type="submit">Enviar</button>
+</from>`,
+            errors: [
+                { line: 0, charPos: 32, explanation: "❌ Atributo method sem aspas (method=POST)" },
+                { line: 1, charPos: 10, explanation: "❌ Label sem atributo for para associar ao input" },
+                { line: 2, charPos: 35, explanation: "❌ Atributo 'nome' inválido (deveria ser 'name')" },
+                { line: 4, charPos: 2, explanation: "❌ Tag de fechamento </from> inválida (era </form>)" },
+                { line: 0, charPos: 5, explanation: "📌 Action sem aspas? está ok" },
+                { line: 3, charPos: 15, explanation: "🔁 Button sem tipo definido corretamente" },
+                { line: 1, charPos: 25, explanation: "🧪 Label sem fechamento adequado" }
+            ]
         }
     ];
 
     let currentLevel = 0;
     let currentErrors = [];
     let attempts = 0;
+    let wrongAttempts = 0;
     let canClick = true;
     let levelCompleted = false;
-    let showCircles = true;
+    let showCircles = false;
+    let helpActivated = false;
+    let helpUsedCount = 0;
+    let pulseAnimationId = null;
+    let pulseActive = false;
 
     // Elementos DOM
     const canvasCorrect = document.getElementById('canvasCorrect');
@@ -79,6 +132,7 @@ else
     const errorsFoundSpan = document.getElementById('errorsFound');
     const errorsRemainingSpan = document.getElementById('errorsRemaining');
     const attemptCounterSpan = document.getElementById('attemptCounter');
+    const errorCountSpan = document.getElementById('errorCount');
     const levelNameSpan = document.getElementById('levelName');
     const feedbackDiv = document.getElementById('feedbackMsg');
     const nextLevelBtn = document.getElementById('nextLevelBtn');
@@ -90,19 +144,196 @@ else
     const congratsLevelName = document.getElementById('congratsLevelName');
     const errorsListContainer = document.getElementById('errorsListContainer');
     const congratsAttempts = document.getElementById('congratsAttempts');
+    const congratsHelpUsed = document.getElementById('congratsHelpUsed');
     const congratsNextBtn = document.getElementById('congratsNextBtn');
     const congratsResetBtn = document.getElementById('congratsResetBtn');
 
-    // Função para animar os números das estatísticas
+    // Variáveis para animação de pulso
+    let pulseFrame = 0;
+    let pulseDirection = 1;
+
     function animateStat(element) {
         element.classList.add('animate');
         setTimeout(() => element.classList.remove('animate'), 300);
     }
 
+    function updateHelpButton() {
+        if (wrongAttempts >= 4 && !helpActivated && !levelCompleted) {
+            forceHelpBtn.style.display = 'block';
+            forceHelpBtn.disabled = false;
+            forceHelpBtn.classList.add('visible');
+            feedbackDiv.innerHTML = `<span class="message warning">💡 DICA DISPONÍVEL! Clique no botão "MOSTRA DICAS" para ver os círculos dos erros!</span>`;
+            setTimeout(() => {
+                if (!levelCompleted && wrongAttempts >= 2 && !helpActivated) {
+                    feedbackDiv.innerHTML = `<span class="message warning">🔴 Você errou ${wrongAttempts} vezes! Ative as dicas clicando no botão laranja!</span>`;
+                }
+            }, 4000);
+        }
+    }
+
+    // Iniciar animação de pulso nos erros (após 1 erro)
+    function startPulseAnimation() {
+        if (pulseActive) return;
+        pulseActive = true;
+        pulseFrame = 0;
+        pulseDirection = 1;
+
+        function animatePulse() {
+            if (!pulseActive || levelCompleted || helpActivated) {
+                pulseActive = false;
+                return;
+            }
+
+            // Atualiza o frame do pulso (oscila entre 0 e 1)
+            pulseFrame += 0.05 * pulseDirection;
+            if (pulseFrame >= 1) {
+                pulseFrame = 1;
+                pulseDirection = -1;
+            } else if (pulseFrame <= 0) {
+                pulseFrame = 0;
+                pulseDirection = 1;
+            }
+
+            // Re-renderiza com o efeito de pulso
+            renderLevelWithPulse(pulseFrame);
+
+            pulseAnimationId = requestAnimationFrame(animatePulse);
+        }
+
+        pulseAnimationId = requestAnimationFrame(animatePulse);
+    }
+
+    function stopPulseAnimation() {
+        if (pulseAnimationId) {
+            cancelAnimationFrame(pulseAnimationId);
+            pulseAnimationId = null;
+        }
+        pulseActive = false;
+        renderLevel(); // Renderiza sem o pulso
+    }
+
+    function renderLevelWithPulse(pulseIntensity) {
+        const level = levels[currentLevel];
+
+        drawCodeAndGetPositions(ctxCorrect, level.correctCode);
+
+        const linePositions = drawCodeAndGetPositions(ctxErros, level.wrongCode);
+        updateErrorPositions(linePositions);
+        drawErrorCircles(ctxErros, pulseIntensity);
+
+        levelNameSpan.innerText = `${level.language} - ${level.name}`;
+        const foundCount = currentErrors.filter(e => e.found).length;
+        const remainingCount = currentErrors.filter(e => !e.found).length;
+        errorsFoundSpan.innerText = foundCount;
+        errorsRemainingSpan.innerText = remainingCount;
+        attemptCounterSpan.innerText = attempts;
+        errorCountSpan.innerText = wrongAttempts;
+
+        if (remainingCount === 0 && !levelCompleted) {
+            levelCompleted = true;
+            canClick = false;
+            stopPulseAnimation();
+            showCongrats();
+        }
+    }
+
+    function drawErrorCircles(ctx, pulseIntensity = 0) {
+        for (let i = 0; i < currentErrors.length; i++) {
+            const err = currentErrors[i];
+
+            if (err.found) {
+                ctx.beginPath();
+                ctx.arc(err.cx, err.cy, err.radius + 2, 0, 2 * Math.PI);
+                ctx.fillStyle = "#22c55e66";
+                ctx.fill();
+                ctx.beginPath();
+                ctx.arc(err.cx, err.cy, err.radius - 1, 0, 2 * Math.PI);
+                ctx.fillStyle = "#16653499";
+                ctx.fill();
+                ctx.font = "bold 14px monospace";
+                ctx.fillStyle = "white";
+                ctx.fillText("✓", err.cx - 4, err.cy + 5);
+            }
+            else if (showCircles) {
+                ctx.shadowBlur = 4;
+                ctx.shadowColor = "rgba(255,0,0,0.2)";
+
+                ctx.beginPath();
+                ctx.arc(err.cx, err.cy, err.radius + 3, 0, 2 * Math.PI);
+                ctx.fillStyle = "#ef444433";
+                ctx.fill();
+
+                ctx.beginPath();
+                ctx.arc(err.cx, err.cy, err.radius + 1, 0, 2 * Math.PI);
+                ctx.fillStyle = "#dc262655";
+                ctx.fill();
+
+                ctx.beginPath();
+                ctx.arc(err.cx, err.cy, err.radius - 2, 0, 2 * Math.PI);
+                ctx.fillStyle = "#ef444488";
+                ctx.fill();
+
+                ctx.beginPath();
+                ctx.arc(err.cx, err.cy, err.radius, 0, 2 * Math.PI);
+                ctx.strokeStyle = "rgba(255, 255, 255, 0.5)";
+                ctx.lineWidth = 1.5;
+                ctx.stroke();
+
+                ctx.shadowBlur = 0;
+
+                ctx.font = "bold 12px monospace";
+                ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
+                ctx.fillText((i + 1).toString(), err.cx - 4, err.cy + 5);
+            }
+            else if (pulseIntensity > 0 && wrongAttempts >= 1 && !helpActivated && !err.found) {
+                // EFEITO DE PULSO - círculo quase transparente que aumenta e diminui
+                const scale = 1 + (pulseIntensity * 0.4); // Aumenta até 40% do tamanho
+                const opacity = 0.3 + (pulseIntensity * 0.2); // Opacidade varia entre 0.3 e 0.5
+                const pulseRadius = err.radius + 5 + (pulseIntensity * 8);
+
+                ctx.shadowBlur = 8;
+                ctx.shadowColor = `rgba(255, 100, 0, ${opacity * 0.5})`;
+
+                // Círculo pulsante externo
+                ctx.beginPath();
+                ctx.arc(err.cx, err.cy, pulseRadius, 0, 2 * Math.PI);
+                ctx.fillStyle = `rgba(255, 100, 0, ${opacity * 0.3})`;
+                ctx.fill();
+
+                // Círculo médio pulsante
+                ctx.beginPath();
+                ctx.arc(err.cx, err.cy, err.radius + 3 + (pulseIntensity * 4), 0, 2 * Math.PI);
+                ctx.fillStyle = `rgba(255, 120, 0, ${opacity * 0.4})`;
+                ctx.fill();
+
+                // Círculo interno com brilho
+                ctx.beginPath();
+                ctx.arc(err.cx, err.cy, err.radius - 2, 0, 2 * Math.PI);
+                ctx.fillStyle = `rgba(255, 80, 0, ${opacity * 0.5})`;
+                ctx.fill();
+
+                // Borda pulsante
+                ctx.beginPath();
+                ctx.arc(err.cx, err.cy, err.radius + 1, 0, 2 * Math.PI);
+                ctx.strokeStyle = `rgba(255, 150, 50, ${0.6 + pulseIntensity * 0.4})`;
+                ctx.lineWidth = 2 + pulseIntensity * 2;
+                ctx.stroke();
+
+                ctx.shadowBlur = 0;
+
+                // Número visível mesmo com pulso
+                ctx.font = "bold 12px monospace";
+                ctx.fillStyle = `rgba(255, 200, 100, 0.9)`;
+                ctx.fillText((i + 1).toString(), err.cx - 4, err.cy + 5);
+            }
+        }
+    }
+
     function showCongrats() {
         const level = levels[currentLevel];
-        congratsLevelName.innerText = level.name;
+        congratsLevelName.innerText = `${level.language} - ${level.name}`;
         congratsAttempts.innerText = attempts;
+        congratsHelpUsed.innerText = helpUsedCount;
 
         errorsListContainer.innerHTML = '';
         currentErrors.forEach((err, index) => {
@@ -128,7 +359,7 @@ else
         if (currentLevel + 1 < levels.length) {
             loadLevel(currentLevel + 1);
         } else {
-            feedbackDiv.innerHTML = `<span class="message success">✨ PARABÉNS! VOCÊ COMPLETOU TODOS OS NÍVEIS! ✨</span>`;
+            feedbackDiv.innerHTML = `<span class="message success">✨ PARABÉNS! VOCÊ COMPLETOU TODOS OS 5 NÍVEIS! ✨</span>`;
             nextLevelBtn.disabled = true;
             levelCompleted = true;
         }
@@ -145,12 +376,12 @@ else
         ctx.fillStyle = "#010409";
         ctx.fillRect(0, 0, w, h);
 
-        ctx.font = "24px 'Fira Code', 'Courier New', monospace";
+        ctx.font = "20px 'Fira Code', 'Courier New', monospace";
         ctx.textBaseline = "top";
 
         const lines = codeText.split('\n');
         let y = 40;
-        const lineHeight = 38;
+        const lineHeight = 32;
         const paddingX = 35;
 
         const linePositions = [];
@@ -181,13 +412,13 @@ else
 
             if (lineInfo) {
                 const ctx = ctxErros;
-                ctx.font = "24px 'Fira Code', 'Courier New', monospace";
+                ctx.font = "20px 'Fira Code', 'Courier New', monospace";
                 const textBefore = lineInfo.text.substring(0, err.charPos);
                 const widthBefore = ctx.measureText(textBefore).width;
 
                 err.cx = lineInfo.x + widthBefore;
-                err.cy = lineInfo.y + 15;
-                err.radius = 14; // TAMANHO REDUZIDO
+                err.cy = lineInfo.y + 12;
+                err.radius = 14;
             } else {
                 err.cx = 100 + (i * 50);
                 err.cy = 100 + (i * 40);
@@ -196,83 +427,20 @@ else
         }
     }
 
-    function drawErrorCircles(ctx) {
-        for (let i = 0; i < currentErrors.length; i++) {
-            const err = currentErrors[i];
-
-            if (err.found) {
-                // Círculo verde de concluído - COM ALTA TRANSPARÊNCIA
-                ctx.beginPath();
-                ctx.arc(err.cx, err.cy, err.radius + 2, 0, 2 * Math.PI);
-                ctx.fillStyle = "#22c55e66"; // 40% opacidade
-                ctx.fill();
-                ctx.beginPath();
-                ctx.arc(err.cx, err.cy, err.radius - 1, 0, 2 * Math.PI);
-                ctx.fillStyle = "#16653499"; // 60% opacidade
-                ctx.fill();
-                ctx.font = "bold 14px monospace";
-                ctx.fillStyle = "white";
-                ctx.fillText("✓", err.cx - 4, err.cy + 5);
-            }
-            else if (showCircles) {
-                ctx.shadowBlur = 4;
-                ctx.shadowColor = "rgba(255,0,0,0.2)";
-
-                // Círculo externo - ALTA TRANSPARÊNCIA (bem suave)
-                ctx.beginPath();
-                ctx.arc(err.cx, err.cy, err.radius + 3, 0, 2 * Math.PI);
-                ctx.fillStyle = "#ef444433"; // 20% opacidade (bem transparente)
-                ctx.fill();
-
-                // Círculo médio
-                ctx.beginPath();
-                ctx.arc(err.cx, err.cy, err.radius + 1, 0, 2 * Math.PI);
-                ctx.fillStyle = "#dc262655"; // 33% opacidade
-                ctx.fill();
-
-                // Círculo interno
-                ctx.beginPath();
-                ctx.arc(err.cx, err.cy, err.radius - 2, 0, 2 * Math.PI);
-                ctx.fillStyle = "#ef444488"; // 53% opacidade
-                ctx.fill();
-
-                // Borda suave
-                ctx.beginPath();
-                ctx.arc(err.cx, err.cy, err.radius, 0, 2 * Math.PI);
-                ctx.strokeStyle = "rgba(255, 255, 255, 0.5)";
-                ctx.lineWidth = 1.5;
-                ctx.stroke();
-
-                ctx.shadowBlur = 0;
-
-                // Número pequeno
-                ctx.font = "bold 12px monospace";
-                ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
-                ctx.fillText((i + 1).toString(), err.cx - 4, err.cy + 5);
-            }
-        }
+    function renderLevel() {
+        renderLevelWithPulse(0);
     }
 
-    function renderLevel() {
-        const level = levels[currentLevel];
-
-        drawCodeAndGetPositions(ctxCorrect, level.correctCode);
-
-        const linePositions = drawCodeAndGetPositions(ctxErros, level.wrongCode);
-        updateErrorPositions(linePositions);
-        drawErrorCircles(ctxErros);
-
-        levelNameSpan.innerText = level.name;
-        const foundCount = currentErrors.filter(e => e.found).length;
-        const remainingCount = currentErrors.filter(e => !e.found).length;
-        errorsFoundSpan.innerText = foundCount;
-        errorsRemainingSpan.innerText = remainingCount;
-        attemptCounterSpan.innerText = attempts;
-
-        if (remainingCount === 0 && !levelCompleted) {
-            levelCompleted = true;
-            canClick = false;
-            showCongrats();
+    function activateHelp() {
+        if (!helpActivated && !levelCompleted && wrongAttempts >= 2) {
+            helpActivated = true;
+            showCircles = true;
+            helpUsedCount++;
+            stopPulseAnimation(); // Para a animação de pulso
+            renderLevel();
+            feedbackDiv.innerHTML = `<span class="message warning">🔆 DICA ATIVADA! Círculos vermelhos mostram onde estão os erros!</span>`;
+            forceHelpBtn.disabled = true;
+            forceHelpBtn.style.opacity = '0.5';
         }
     }
 
@@ -316,6 +484,7 @@ else
         animateStat(attemptCounterSpan);
 
         if (hitIndex !== -1) {
+            // ACERTOU
             currentErrors[hitIndex].found = true;
             const remainingCount = currentErrors.filter(e => !e.found).length;
 
@@ -323,20 +492,40 @@ else
             animateStat(errorsFoundSpan);
             animateStat(errorsRemainingSpan);
 
+            // Se ainda faltam erros e tem pulso ativo, continua
+            if (remainingCount > 0 && wrongAttempts >= 1 && !helpActivated) {
+                // Continua o pulso
+            } else if (remainingCount === 0) {
+                stopPulseAnimation();
+            }
+
             if (remainingCount === 0) {
                 levelCompleted = true;
                 canClick = false;
+                stopPulseAnimation();
                 showCongrats();
             }
 
             renderLevel();
         } else {
-            if (showCircles) {
-                feedbackDiv.innerHTML = `<span class="message error">❌ Clique exatamente nos CÍRCULOS SUAVES em cima dos erros!</span>`;
+            // ERROU
+            const wasWrongAttempts = wrongAttempts;
+            wrongAttempts++;
+            animateStat(errorCountSpan);
+
+            // Se foi o PRIMEIRO erro, inicia a animação de pulso
+            if (wasWrongAttempts === 0 && wrongAttempts === 1 && !helpActivated) {
+                startPulseAnimation();
+                feedbackDiv.innerHTML = `<span class="message warning">🔵 DICA VISUAL ATIVADA! Os erros estão pulsando! Após 2 erros, círculos fixos aparecerão.</span>`;
+            } else if (wrongAttempts < 2) {
+                const remainingToHelp = 2 - wrongAttempts;
+                feedbackDiv.innerHTML = `<span class="message error">❌ Errou! Faltam ${remainingToHelp} erro(s) para liberar as dicas fixas. Os erros estão pulsando!</span>`;
             } else {
-                feedbackDiv.innerHTML = `<span class="message error">❌ Nenhum erro aqui! Ative os círculos para ver onde estão.</span>`;
+                feedbackDiv.innerHTML = `<span class="message error">❌ Errou! Clique no botão laranja para ver as dicas fixas!</span>`;
             }
+
             renderLevel();
+            updateHelpButton();
         }
 
         canClick = false;
@@ -348,11 +537,24 @@ else
             feedbackDiv.innerHTML = `<span class="message">Nível completo! Avance ou reinicie.</span>`;
             return;
         }
-        showCircles = !showCircles;
-        renderLevel();
-        feedbackDiv.innerHTML = showCircles ?
-            `<span class="message warning">🔴 CÍRCULOS VISÍVEIS! Clique nos círculos suaves!</span>` :
-            `<span class="message">⚪ Círculos ocultos. Tente achar os erros sozinho!</span>`;
+
+        if (wrongAttempts >= 2 && !helpActivated) {
+            activateHelp();
+        } else if (helpActivated) {
+            showCircles = !showCircles;
+            if (!showCircles && wrongAttempts >= 1 && !helpActivated) {
+                // Se esconder círculos e tiver pulso, reativa o pulso
+                startPulseAnimation();
+            } else if (showCircles) {
+                stopPulseAnimation();
+            }
+            renderLevel();
+            feedbackDiv.innerHTML = showCircles ?
+                `<span class="message warning">🔴 CÍRCULOS VISÍVEIS! Clique nos círculos vermelhos!</span>` :
+                `<span class="message">⚪ Círculos ocultos. ${wrongAttempts >= 1 ? 'Os erros estão pulsando!' : 'Tente achar os erros sozinho!'}</span>`;
+        } else {
+            feedbackDiv.innerHTML = `<span class="message error">⚠️ Você precisa errar ${2 - wrongAttempts} vez(es) para liberar as dicas!</span>`;
+        }
     }
 
     function loadLevel(levelIndex) {
@@ -369,13 +571,25 @@ else
         }));
 
         attempts = 0;
+        wrongAttempts = 0;
         levelCompleted = false;
         canClick = true;
-        showCircles = true;
+        showCircles = false;
+        helpActivated = false;
+        helpUsedCount = 0;
         currentLevel = levelIndex;
+
+        // Para animação de pulso se estiver ativa
+        stopPulseAnimation();
+
+        // Reset botão de ajuda
+        forceHelpBtn.style.display = 'none';
+        forceHelpBtn.disabled = true;
+        forceHelpBtn.style.opacity = '1';
+
         renderLevel();
         nextLevelBtn.disabled = true;
-        feedbackDiv.innerHTML = `<span class="message">🔴 Nível ${levelData.name}: CLIQUE NOS CÍRCULOS SUAVES em cima dos erros! Encontre os 7 erros.</span>`;
+        feedbackDiv.innerHTML = `<span class="message">🔴 Nível ${levelData.language} - ${levelData.name}: Encontre os 7 erros! Após 1 erro, os erros vão piscar! Após 2 erros, dicas fixas serão liberadas.</span>`;
     }
 
     function nextLevel() {
@@ -384,7 +598,7 @@ else
             if (currentLevel + 1 < levels.length) {
                 loadLevel(currentLevel + 1);
             } else {
-                feedbackDiv.innerHTML = `<span class="message success">✨ PARABÉNS! VOCÊ COMPLETOU TODOS OS NÍVEIS! ✨</span>`;
+                feedbackDiv.innerHTML = `<span class="message success">✨ PARABÉNS! VOCÊ COMPLETOU TODOS OS 5 NÍVEIS! ✨</span>`;
                 nextLevelBtn.disabled = true;
                 levelCompleted = true;
             }
@@ -395,6 +609,7 @@ else
 
     function resetGame() {
         hideCongrats();
+        stopPulseAnimation();
         loadLevel(0);
     }
 
