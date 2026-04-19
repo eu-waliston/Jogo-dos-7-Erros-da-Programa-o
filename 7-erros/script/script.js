@@ -1,8 +1,106 @@
 (function () {
-    // ========== DEFINIÇÃO DOS NÍVEIS ==========
+    // ========== PERFIS NARRATIVOS E HISTÓRIA ==========
+    const profiles = {
+        hacker: {
+            name: "Hacker de Elite",
+            enemyName: "Vírus 'Glitch'",
+            enemyColor: "#22c55e",
+            enemyEyeColor: "#000",
+            levelNames: [
+                "MISSÃO 1: Saudação do Servidor Oculto",
+                "MISSÃO 2: Quebra do Firewall de Acesso",
+                "MISSÃO 3: Loop do Núcleo do Sistema",
+                "MISSÃO 4: Interface de Login da Intranet",
+                "MISSÃO 5: Backdoor do Painel de Controle"
+            ],
+            levelIntros: [
+                "🖥️ SISTEMA INICIADO: O Vírus 'Glitch' foi detectado tentando alterar a mensagem de boas-vindas do servidor oculto.",
+                "🖥️ ALERTA: O Glitch está corrompendo a lógica de idade do firewall. Proteja o banco de dados!",
+                "🖥️ EMERGÊNCIA: Um loop infinito foi inserido no núcleo para sobrecarregar a CPU. Prepare-se para interceptar!",
+                "🖥️ INVASÃO FRONT-END: O vírus está desfigurando a página principal da intranet da corporação.",
+                "🖥️ BACKDOOR DETECTADO: O Glitch tentou adulterar o formulário de envio de dados para vazar senhas. Pare-o!"
+            ],
+            stealMsg: "💥 MALWARE EXECUTADO! O Glitch criptografou a sintaxe. Acesse os pontos vermelhos para debugar e restaurar a linha de código!",
+            winMsg: "✅ DEBUG CONCLUÍDO! O código está limpo.",
+            drawEnemy: (ctx, x, y) => {
+                ctx.fillStyle = profiles.hacker.enemyColor;
+                ctx.fillRect(x, y, 25, 25);
+                ctx.fillStyle = "#010409";
+                ctx.font = "14px monospace";
+                ctx.fillText("01", x + 4, y + 18);
+            }
+        },
+        mago: {
+            name: "Mago do Código",
+            enemyName: "Goblin Ladrão de Feitiços",
+            enemyColor: "#8b5cf6",
+            enemyEyeColor: "#fbbf24",
+            levelNames: [
+                "CAPÍTULO 1: Feitiço de Invocação",
+                "CAPÍTULO 2: Encantamento de Barreira",
+                "CAPÍTULO 3: Ritual de Repetição Astral",
+                "CAPÍTULO 4: Pergaminho de Ilusão",
+                "CAPÍTULO 5: Contrato de Pacto Mágico"
+            ],
+            levelIntros: [
+                "🧙‍♂️ O grimório foi aberto. Um Goblin sorrateiro se aproxima do feitiço básico de invocação...",
+                "🧙‍♂️ Atenção! O Goblin quer quebrar a magia de barreira que protege os aprendizes mais jovens.",
+                "🧙‍♂️ O ritual astral está instável! O Goblin Ladrão tenta sabotar as linhas de repetição de energia.",
+                "🧙‍♂️ As antigas escrituras em HTML (Hiper-Texto Mágico Antigo) estão sendo reescritas pela criatura!",
+                "🧙‍♂️ O ritual final: O Goblin quer adulterar as assinaturas do Pacto Mágico de Envio. Defenda as runas!"
+            ],
+            stealMsg: "💥 ZAP! O Goblin sugou as runas e desestabilizou o feitiço! Conserte os nós mágicos nas linhas!",
+            winMsg: "✅ FEITIÇO RESTAURADO! A magia flui perfeitamente.",
+            drawEnemy: (ctx, x, y) => {
+                ctx.fillStyle = profiles.mago.enemyColor;
+                ctx.beginPath();
+                ctx.moveTo(x + 12.5, y);
+                ctx.lineTo(x + 25, y + 25);
+                ctx.lineTo(x, y + 25);
+                ctx.fill();
+                ctx.fillStyle = profiles.mago.enemyEyeColor;
+                ctx.fillRect(x + 8, y + 12, 10, 4);
+            }
+        },
+        detetive: {
+            name: "Detetive Cibernético",
+            enemyName: "Falsificador",
+            enemyColor: "#f97316",
+            enemyEyeColor: "#000",
+            levelNames: [
+                "CASO 1: O Registro de Ponto Falso",
+                "CASO 2: Sabotagem na Câmera de Segurança",
+                "CASO 3: Rastreamento de Pegadas Digitais",
+                "CASO 4: O Site de Phishing",
+                "CASO 5: Formulário de Extorsão"
+            ],
+            levelIntros: [
+                "🕵️ Detetive, temos um caso. O Falsificador está tentando alterar os registros de entrada do suspeito principal.",
+                "🕵️ Ele está na sala das câmeras! Está tentando mudar a lógica de quem tem autorização para entrar no cofre.",
+                "🕵️ Estamos seguindo as pegadas dele num loop de dados, mas ele está tentando apagar seus rastros do sistema.",
+                "🕵️ Encontramos uma página falsa que ele usou como isca. Ele está alterando a estrutura para enganar vítimas.",
+                "🕵️ A peça final: o formulário usado para roubar as credenciais. Ele vai tentar esconder as provas finais!"
+            ],
+            stealMsg: "💥 CENA DO CRIME ADULTERADA! O Falsificador danificou as provas. Encontre as contradições na sintaxe para desmascará-lo!",
+            winMsg: "✅ MISTÉRIO RESOLVIDO! Você encontrou as falhas do criminoso.",
+            drawEnemy: (ctx, x, y) => {
+                ctx.fillStyle = profiles.detetive.enemyColor;
+                ctx.fillRect(x, y, 25, 25);
+                ctx.fillStyle = profiles.detetive.enemyEyeColor;
+                ctx.fillRect(x, y + 6, 25, 8);
+                ctx.fillStyle = "white";
+                ctx.fillRect(x + 4, y + 8, 4, 4);
+                ctx.fillRect(x + 16, y + 8, 4, 4);
+            }
+        }
+    };
+
+    let currentProfile = profiles.detetive;
+
+    // ========== DEFINIÇÃO DOS CÓDIGOS E ERROS ==========
+    // O código permanece o mesmo, mas a interface vai usar os textos do perfil
     const levels = [
         {
-            name: "PYTHON - INICIANTE",
             language: "🐍 Python",
             correctCode: `def saudacao(nome):
     print("Olá, " + nome + "!")
@@ -21,7 +119,6 @@
             ]
         },
         {
-            name: "PYTHON - INTERMEDIÁRIO",
             language: "🐍 Python",
             correctCode: `idade = 18
 if idade >= 18:
@@ -44,7 +141,6 @@ else
             ]
         },
         {
-            name: "PYTHON - AVANÇADO",
             language: "🐍 Python",
             correctCode: `for i in range(3):
     print(f"Valor: {i}")
@@ -65,7 +161,6 @@ else
             ]
         },
         {
-            name: "HTML - BÁSICO",
             language: "🌐 HTML",
             correctCode: `<div class="container">
     <h1>Bem-vindo ao Site</h1>
@@ -88,7 +183,6 @@ else
             ]
         },
         {
-            name: "HTML - AVANÇADO",
             language: "🌐 HTML",
             correctCode: `<form action="/enviar" method="POST">
     <label for="nome">Nome:</label>
@@ -112,11 +206,21 @@ else
         }
     ];
 
+    let thief = {
+        active: false,
+        x: -60,
+        y: 80,
+        speed: 5,
+        targetLine: null,
+        hasStolen: false
+    };
+
     let currentLevel = 0;
+    let currentWrongCode = "";
     let currentErrors = [];
     let attempts = 0;
     let wrongAttempts = 0;
-    let canClick = true;
+    let canClick = false; 
     let levelCompleted = false;
     let showCircles = false;
     let helpActivated = false;
@@ -139,7 +243,6 @@ else
     const resetBtn = document.getElementById('resetBtn');
     const forceHelpBtn = document.getElementById('forceHelpBtn');
 
-    // Elementos da tela de parabéns
     const congratsOverlay = document.getElementById('congratsOverlay');
     const congratsLevelName = document.getElementById('congratsLevelName');
     const errorsListContainer = document.getElementById('errorsListContainer');
@@ -148,9 +251,55 @@ else
     const congratsNextBtn = document.getElementById('congratsNextBtn');
     const congratsResetBtn = document.getElementById('congratsResetBtn');
 
-    // Variáveis para animação de pulso
     let pulseFrame = 0;
     let pulseDirection = 1;
+
+    // --- SETUP DO QUESTIONÁRIO INICIAL ---
+    function initQuestionnaire() {
+        const overlay = document.createElement('div');
+        overlay.id = 'profileOverlay';
+        overlay.style.cssText = `
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(1, 4, 9, 0.95); z-index: 9999;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            color: white; font-family: 'Courier New', Courier, monospace; text-align: center;
+        `;
+        
+        overlay.innerHTML = `
+            <h1 style="color: #22c55e; margin-bottom: 10px;">INICIANDO SISTEMA...</h1>
+            <p style="margin-bottom: 30px; font-size: 18px;">Selecione o seu perfil de depuração de código:</p>
+            
+            <div style="display: flex; gap: 20px; flex-wrap: wrap; justify-content: center;">
+                <button class="profile-btn" data-profile="hacker" style="padding: 15px 25px; font-size: 16px; cursor: pointer; background: #052e16; color: #22c55e; border: 2px solid #22c55e; border-radius: 8px; transition: 0.3s;">
+                    💻 Hacker de Elite
+                </button>
+                <button class="profile-btn" data-profile="mago" style="padding: 15px 25px; font-size: 16px; cursor: pointer; background: #2e1065; color: #a855f7; border: 2px solid #a855f7; border-radius: 8px; transition: 0.3s;">
+                    🧙‍♂️ Mago do Código
+                </button>
+                <button class="profile-btn" data-profile="detetive" style="padding: 15px 25px; font-size: 16px; cursor: pointer; background: #431407; color: #f97316; border: 2px solid #f97316; border-radius: 8px; transition: 0.3s;">
+                    🕵️ Detetive Cibernético
+                </button>
+            </div>
+        `;
+        
+        document.body.appendChild(overlay);
+
+        document.querySelectorAll('.profile-btn').forEach(btn => {
+            btn.addEventListener('mouseenter', e => e.target.style.transform = 'scale(1.05)');
+            btn.addEventListener('mouseleave', e => e.target.style.transform = 'scale(1)');
+            
+            btn.addEventListener('click', (e) => {
+                const profileKey = e.target.getAttribute('data-profile');
+                currentProfile = profiles[profileKey];
+                
+                overlay.style.opacity = '0';
+                setTimeout(() => {
+                    document.body.removeChild(overlay);
+                    initGameEngine(); 
+                }, 300);
+            });
+        });
+    }
 
     function animateStat(element) {
         element.classList.add('animate');
@@ -163,15 +312,9 @@ else
             forceHelpBtn.disabled = false;
             forceHelpBtn.classList.add('visible');
             feedbackDiv.innerHTML = `<span class="message warning">💡 DICA DISPONÍVEL! Clique no botão "MOSTRA DICAS" para ver os círculos dos erros!</span>`;
-            setTimeout(() => {
-                if (!levelCompleted && wrongAttempts >= 2 && !helpActivated) {
-                    feedbackDiv.innerHTML = `<span class="message warning">🔴 Você errou ${wrongAttempts} vezes! Ative as dicas clicando no botão laranja!</span>`;
-                }
-            }, 4000);
         }
     }
 
-    // Iniciar animação de pulso nos erros (após 1 erro)
     function startPulseAnimation() {
         if (pulseActive) return;
         pulseActive = true;
@@ -183,23 +326,12 @@ else
                 pulseActive = false;
                 return;
             }
-
-            // Atualiza o frame do pulso (oscila entre 0 e 1)
             pulseFrame += 0.05 * pulseDirection;
-            if (pulseFrame >= 1) {
-                pulseFrame = 1;
-                pulseDirection = -1;
-            } else if (pulseFrame <= 0) {
-                pulseFrame = 0;
-                pulseDirection = 1;
-            }
-
-            // Re-renderiza com o efeito de pulso
+            if (pulseFrame >= 1) { pulseFrame = 1; pulseDirection = -1; } 
+            else if (pulseFrame <= 0) { pulseFrame = 0; pulseDirection = 1; }
             renderLevelWithPulse(pulseFrame);
-
             pulseAnimationId = requestAnimationFrame(animatePulse);
         }
-
         pulseAnimationId = requestAnimationFrame(animatePulse);
     }
 
@@ -209,19 +341,19 @@ else
             pulseAnimationId = null;
         }
         pulseActive = false;
-        renderLevel(); // Renderiza sem o pulso
+        renderLevel();
     }
 
     function renderLevelWithPulse(pulseIntensity) {
         const level = levels[currentLevel];
-
         drawCodeAndGetPositions(ctxCorrect, level.correctCode);
-
-        const linePositions = drawCodeAndGetPositions(ctxErros, level.wrongCode);
+        const linePositions = drawCodeAndGetPositions(ctxErros, currentWrongCode);
         updateErrorPositions(linePositions);
         drawErrorCircles(ctxErros, pulseIntensity);
 
-        levelNameSpan.innerText = `${level.language} - ${level.name}`;
+        // NOME DA FASE ADAPTADO AO PERFIL DA HISTÓRIA
+        levelNameSpan.innerText = `${level.language} - ${currentProfile.levelNames[currentLevel]}`;
+        
         const foundCount = currentErrors.filter(e => e.found).length;
         const remainingCount = currentErrors.filter(e => !e.found).length;
         errorsFoundSpan.innerText = foundCount;
@@ -238,9 +370,10 @@ else
     }
 
     function drawErrorCircles(ctx, pulseIntensity = 0) {
+        if (!canClick && !levelCompleted) return;
+
         for (let i = 0; i < currentErrors.length; i++) {
             const err = currentErrors[i];
-
             if (err.found) {
                 ctx.beginPath();
                 ctx.arc(err.cx, err.cy, err.radius + 2, 0, 2 * Math.PI);
@@ -253,113 +386,53 @@ else
                 ctx.font = "bold 14px monospace";
                 ctx.fillStyle = "white";
                 ctx.fillText("✓", err.cx - 4, err.cy + 5);
-            }
-            else if (showCircles) {
+            } else if (showCircles) {
                 ctx.shadowBlur = 4;
                 ctx.shadowColor = "rgba(255,0,0,0.2)";
-
                 ctx.beginPath();
                 ctx.arc(err.cx, err.cy, err.radius + 3, 0, 2 * Math.PI);
                 ctx.fillStyle = "#ef444433";
                 ctx.fill();
-
-                ctx.beginPath();
-                ctx.arc(err.cx, err.cy, err.radius + 1, 0, 2 * Math.PI);
-                ctx.fillStyle = "#dc262655";
-                ctx.fill();
-
-                ctx.beginPath();
-                ctx.arc(err.cx, err.cy, err.radius - 2, 0, 2 * Math.PI);
-                ctx.fillStyle = "#ef444488";
-                ctx.fill();
-
                 ctx.beginPath();
                 ctx.arc(err.cx, err.cy, err.radius, 0, 2 * Math.PI);
                 ctx.strokeStyle = "rgba(255, 255, 255, 0.5)";
                 ctx.lineWidth = 1.5;
                 ctx.stroke();
-
                 ctx.shadowBlur = 0;
-
-                ctx.font = "bold 12px monospace";
-                ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
-                ctx.fillText((i + 1).toString(), err.cx - 4, err.cy + 5);
-            }
-            else if (pulseIntensity > 0 && wrongAttempts >= 1 && !helpActivated && !err.found) {
-                // EFEITO DE PULSO - círculo quase transparente que aumenta e diminui
-                const scale = 1 + (pulseIntensity * 0.4); // Aumenta até 40% do tamanho
-                const opacity = 0.3 + (pulseIntensity * 0.2); // Opacidade varia entre 0.3 e 0.5
-                const pulseRadius = err.radius + 5 + (pulseIntensity * 8);
-
-                ctx.shadowBlur = 8;
-                ctx.shadowColor = `rgba(255, 100, 0, ${opacity * 0.5})`;
-
-                // Círculo pulsante externo
+            } else if (pulseIntensity > 0 && wrongAttempts >= 1 && !helpActivated && !err.found) {
+                const opacity = 0.3 + (pulseIntensity * 0.2);
                 ctx.beginPath();
-                ctx.arc(err.cx, err.cy, pulseRadius, 0, 2 * Math.PI);
+                ctx.arc(err.cx, err.cy, err.radius + 5 + (pulseIntensity * 8), 0, 2 * Math.PI);
                 ctx.fillStyle = `rgba(255, 100, 0, ${opacity * 0.3})`;
                 ctx.fill();
-
-                // Círculo médio pulsante
-                ctx.beginPath();
-                ctx.arc(err.cx, err.cy, err.radius + 3 + (pulseIntensity * 4), 0, 2 * Math.PI);
-                ctx.fillStyle = `rgba(255, 120, 0, ${opacity * 0.4})`;
-                ctx.fill();
-
-                // Círculo interno com brilho
-                ctx.beginPath();
-                ctx.arc(err.cx, err.cy, err.radius - 2, 0, 2 * Math.PI);
-                ctx.fillStyle = `rgba(255, 80, 0, ${opacity * 0.5})`;
-                ctx.fill();
-
-                // Borda pulsante
-                ctx.beginPath();
-                ctx.arc(err.cx, err.cy, err.radius + 1, 0, 2 * Math.PI);
-                ctx.strokeStyle = `rgba(255, 150, 50, ${0.6 + pulseIntensity * 0.4})`;
-                ctx.lineWidth = 2 + pulseIntensity * 2;
-                ctx.stroke();
-
-                ctx.shadowBlur = 0;
-
-                // Número visível mesmo com pulso
-                ctx.font = "bold 12px monospace";
-                ctx.fillStyle = `rgba(255, 200, 100, 0.9)`;
-                ctx.fillText((i + 1).toString(), err.cx - 4, err.cy + 5);
             }
         }
     }
 
     function showCongrats() {
         const level = levels[currentLevel];
-        congratsLevelName.innerText = `${level.language} - ${level.name}`;
+        // TELA DE VITÓRIA USANDO O TÍTULO DA HISTÓRIA
+        congratsLevelName.innerText = `${level.language} - ${currentProfile.levelNames[currentLevel]}`;
         congratsAttempts.innerText = attempts;
         congratsHelpUsed.innerText = helpUsedCount;
-
         errorsListContainer.innerHTML = '';
         currentErrors.forEach((err, index) => {
             const errorDiv = document.createElement('div');
             errorDiv.className = 'error-item';
-            errorDiv.style.animationDelay = `${index * 0.05}s`;
-            errorDiv.innerHTML = `
-                    <div class="error-number">${index + 1}</div>
-                    <div class="error-text">${err.explanation}</div>
-                `;
+            errorDiv.innerHTML = `<div class="error-number">${index + 1}</div><div class="error-text">${err.explanation}</div>`;
             errorsListContainer.appendChild(errorDiv);
         });
-
         congratsOverlay.classList.remove('hidden');
     }
 
-    function hideCongrats() {
-        congratsOverlay.classList.add('hidden');
-    }
+    function hideCongrats() { congratsOverlay.classList.add('hidden'); }
 
     function nextLevelFromCongrats() {
         hideCongrats();
         if (currentLevel + 1 < levels.length) {
             loadLevel(currentLevel + 1);
         } else {
-            feedbackDiv.innerHTML = `<span class="message success">✨ PARABÉNS! VOCÊ COMPLETOU TODOS OS 5 NÍVEIS! ✨</span>`;
+            feedbackDiv.innerHTML = `<span class="message success">✨ FIM DE JOGO! VOCÊ COMPLETOU TODAS AS MISSÕES COMO ${currentProfile.name.toUpperCase()}! ✨</span>`;
             nextLevelBtn.disabled = true;
             levelCompleted = true;
         }
@@ -371,37 +444,23 @@ else
     }
 
     function drawCodeAndGetPositions(ctx, codeText) {
-        const w = canvasCorrect.width, h = canvasCorrect.height;
+        const w = ctx.canvas.width, h = ctx.canvas.height;
         ctx.clearRect(0, 0, w, h);
         ctx.fillStyle = "#010409";
         ctx.fillRect(0, 0, w, h);
-
         ctx.font = "20px 'Fira Code', 'Courier New', monospace";
         ctx.textBaseline = "top";
 
         const lines = codeText.split('\n');
         let y = 40;
-        const lineHeight = 32;
-        const paddingX = 35;
-
         const linePositions = [];
 
         for (let i = 0; i < lines.length; i++) {
-            let line = lines[i];
             ctx.fillStyle = "#e6edf3";
-            ctx.fillText(line, paddingX, y);
-
-            linePositions.push({
-                lineIndex: i,
-                y: y,
-                x: paddingX,
-                text: line
-            });
-
-            y += lineHeight;
-            if (y > h - 30) break;
+            ctx.fillText(lines[i], 35, y);
+            linePositions.push({ lineIndex: i, y: y, x: 35, text: lines[i] });
+            y += 32;
         }
-
         return linePositions;
     }
 
@@ -409,34 +468,23 @@ else
         for (let i = 0; i < currentErrors.length; i++) {
             const err = currentErrors[i];
             const lineInfo = linePositions.find(lp => lp.lineIndex === err.line);
-
             if (lineInfo) {
-                const ctx = ctxErros;
-                ctx.font = "20px 'Fira Code', 'Courier New', monospace";
                 const textBefore = lineInfo.text.substring(0, err.charPos);
-                const widthBefore = ctx.measureText(textBefore).width;
-
-                err.cx = lineInfo.x + widthBefore;
+                err.cx = lineInfo.x + ctxErros.measureText(textBefore).width;
                 err.cy = lineInfo.y + 12;
-                err.radius = 14;
-            } else {
-                err.cx = 100 + (i * 50);
-                err.cy = 100 + (i * 40);
                 err.radius = 14;
             }
         }
     }
 
-    function renderLevel() {
-        renderLevelWithPulse(0);
-    }
+    function renderLevel() { renderLevelWithPulse(0); }
 
     function activateHelp() {
         if (!helpActivated && !levelCompleted && wrongAttempts >= 2) {
             helpActivated = true;
             showCircles = true;
             helpUsedCount++;
-            stopPulseAnimation(); // Para a animação de pulso
+            stopPulseAnimation();
             renderLevel();
             feedbackDiv.innerHTML = `<span class="message warning">🔆 DICA ATIVADA! Círculos vermelhos mostram onde estão os erros!</span>`;
             forceHelpBtn.disabled = true;
@@ -446,37 +494,20 @@ else
 
     function handleCanvasClick(e) {
         if (levelCompleted || !canClick) return;
-
         const rect = canvasErros.getBoundingClientRect();
-        const scaleX = canvasErros.width / rect.width;
-        const scaleY = canvasErros.height / rect.height;
+        let clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        let clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        if (e.touches) e.preventDefault();
 
-        let clientX, clientY;
-        if (e.touches) {
-            clientX = e.touches[0].clientX;
-            clientY = e.touches[0].clientY;
-            e.preventDefault();
-        } else {
-            clientX = e.clientX;
-            clientY = e.clientY;
-        }
-
-        let canvasX = (clientX - rect.left) * scaleX;
-        let canvasY = (clientY - rect.top) * scaleY;
-
-        if (canvasX < 0 || canvasX > canvasErros.width || canvasY < 0 || canvasY > canvasErros.height) return;
+        let canvasX = (clientX - rect.left) * (canvasErros.width / rect.width);
+        let canvasY = (clientY - rect.top) * (canvasErros.height / rect.height);
 
         let hitIndex = -1;
         for (let i = 0; i < currentErrors.length; i++) {
             const err = currentErrors[i];
             if (!err.found) {
-                const dx = canvasX - err.cx;
-                const dy = canvasY - err.cy;
-                const dist = Math.sqrt(dx * dx + dy * dy);
-                if (dist <= err.radius + 12) {
-                    hitIndex = i;
-                    break;
-                }
+                const dist = Math.sqrt(Math.pow(canvasX - err.cx, 2) + Math.pow(canvasY - err.cy, 2));
+                if (dist <= err.radius + 15) { hitIndex = i; break; }
             }
         }
 
@@ -484,149 +515,105 @@ else
         animateStat(attemptCounterSpan);
 
         if (hitIndex !== -1) {
-            // ACERTOU
             currentErrors[hitIndex].found = true;
-            const remainingCount = currentErrors.filter(e => !e.found).length;
-
-            feedbackDiv.innerHTML = `<span class="message success">✅ ACERTOU! ${currentErrors[hitIndex].explanation}</span>`;
+            feedbackDiv.innerHTML = `<span class="message success">${currentProfile.winMsg} <br> ${currentErrors[hitIndex].explanation}</span>`;
             animateStat(errorsFoundSpan);
             animateStat(errorsRemainingSpan);
 
-            // Se ainda faltam erros e tem pulso ativo, continua
-            if (remainingCount > 0 && wrongAttempts >= 1 && !helpActivated) {
-                // Continua o pulso
-            } else if (remainingCount === 0) {
+            if (currentErrors.filter(e => !e.found).length === 0) {
                 stopPulseAnimation();
-            }
-
-            if (remainingCount === 0) {
                 levelCompleted = true;
                 canClick = false;
-                stopPulseAnimation();
                 showCongrats();
             }
-
             renderLevel();
         } else {
-            // ERROU
-            const wasWrongAttempts = wrongAttempts;
             wrongAttempts++;
             animateStat(errorCountSpan);
-
-            // Se foi o PRIMEIRO erro, inicia a animação de pulso
-            if (wasWrongAttempts === 0 && wrongAttempts === 1 && !helpActivated) {
+            if (wrongAttempts === 1 && !helpActivated) {
                 startPulseAnimation();
-                feedbackDiv.innerHTML = `<span class="message warning">🔵 DICA VISUAL ATIVADA! Os erros estão pulsando! Após 2 erros, círculos fixos aparecerão.</span>`;
-            } else if (wrongAttempts < 2) {
-                const remainingToHelp = 2 - wrongAttempts;
-                feedbackDiv.innerHTML = `<span class="message error">❌ Errou! Faltam ${remainingToHelp} erro(s) para liberar as dicas fixas. Os erros estão pulsando!</span>`;
+                feedbackDiv.innerHTML = `<span class="message warning">🔵 O sistema detectou anomalias... Os erros estão pulsando!</span>`;
             } else {
-                feedbackDiv.innerHTML = `<span class="message error">❌ Errou! Clique no botão laranja para ver as dicas fixas!</span>`;
+                feedbackDiv.innerHTML = `<span class="message error">❌ Errou! Analise o código com cuidado.</span>`;
             }
-
             renderLevel();
             updateHelpButton();
         }
-
         canClick = false;
         setTimeout(() => { if (!levelCompleted) canClick = true; }, 300);
     }
 
     function toggleCircles() {
-        if (levelCompleted) {
-            feedbackDiv.innerHTML = `<span class="message">Nível completo! Avance ou reinicie.</span>`;
-            return;
-        }
-
-        if (wrongAttempts >= 2 && !helpActivated) {
-            activateHelp();
-        } else if (helpActivated) {
+        if (levelCompleted) return;
+        if (wrongAttempts >= 2 && !helpActivated) activateHelp();
+        else if (helpActivated) {
             showCircles = !showCircles;
-            if (!showCircles && wrongAttempts >= 1 && !helpActivated) {
-                // Se esconder círculos e tiver pulso, reativa o pulso
-                startPulseAnimation();
-            } else if (showCircles) {
-                stopPulseAnimation();
-            }
+            if (!showCircles && wrongAttempts >= 1) startPulseAnimation();
+            else if (showCircles) stopPulseAnimation();
             renderLevel();
-            feedbackDiv.innerHTML = showCircles ?
-                `<span class="message warning">🔴 CÍRCULOS VISÍVEIS! Clique nos círculos vermelhos!</span>` :
-                `<span class="message">⚪ Círculos ocultos. ${wrongAttempts >= 1 ? 'Os erros estão pulsando!' : 'Tente achar os erros sozinho!'}</span>`;
-        } else {
-            feedbackDiv.innerHTML = `<span class="message error">⚠️ Você precisa errar ${2 - wrongAttempts} vez(es) para liberar as dicas!</span>`;
         }
     }
 
     function loadLevel(levelIndex) {
         const levelData = levels[levelIndex];
+        thief.active = true;
+        thief.x = -60;
+        thief.y = 40 + (Math.floor(Math.random() * levelData.correctCode.split("\n").length) * 32);
+        
+        currentWrongCode = levelData.correctCode;
+        setTimeout(() => { startThiefAnimation(); }, 800);
+
         currentErrors = levelData.errors.map((err, idx) => ({
-            id: idx,
-            line: err.line,
-            charPos: err.charPos,
-            explanation: err.explanation,
-            found: false,
-            cx: 0,
-            cy: 0,
-            radius: 14
+            id: idx, line: err.line, charPos: err.charPos, explanation: err.explanation, found: false, cx: 0, cy: 0, radius: 14
         }));
 
-        attempts = 0;
-        wrongAttempts = 0;
-        levelCompleted = false;
-        canClick = true;
-        showCircles = false;
-        helpActivated = false;
-        helpUsedCount = 0;
-        currentLevel = levelIndex;
-
-        // Para animação de pulso se estiver ativa
+        attempts = 0; wrongAttempts = 0; levelCompleted = false; canClick = false; showCircles = false; helpActivated = false; helpUsedCount = 0; currentLevel = levelIndex;
         stopPulseAnimation();
-
-        // Reset botão de ajuda
         forceHelpBtn.style.display = 'none';
-        forceHelpBtn.disabled = true;
-        forceHelpBtn.style.opacity = '1';
 
         renderLevel();
         nextLevelBtn.disabled = true;
-        feedbackDiv.innerHTML = `<span class="message">🔴 Nível ${levelData.language} - ${levelData.name}: Encontre os 7 erros! Após 1 erro, os erros vão piscar! Após 2 erros, dicas fixas serão liberadas.</span>`;
+
+        // FEEDBACK DE INTRODUÇÃO ESPECÍFICO DO NÍVEL E DO PERFIL
+        feedbackDiv.innerHTML = `<span class="message warning">${currentProfile.levelIntros[currentLevel]}</span>`;
+    }
+
+    function startThiefAnimation() {
+        function animate() {
+            if (!thief.active) return;
+            thief.x += thief.speed;
+            renderLevel(); 
+            currentProfile.drawEnemy(ctxErros, thief.x, thief.y); 
+
+            if (thief.x < canvasErros.width + 50) requestAnimationFrame(animate);
+            else { thief.active = false; stealCodeLine(); }
+        }
+        animate();
+    }
+
+    function stealCodeLine() {
+        currentWrongCode = levels[currentLevel].wrongCode; 
+        canClick = true; 
+        renderLevel();
+        
+        // FEEDBACK DE ROUBO ESPECÍFICO DO PERFIL
+        feedbackDiv.innerHTML = `<span class="message error">${currentProfile.stealMsg}</span>`;
     }
 
     function nextLevel() {
-        const remainingCount = currentErrors.filter(e => !e.found).length;
-        if (remainingCount === 0) {
-            if (currentLevel + 1 < levels.length) {
-                loadLevel(currentLevel + 1);
-            } else {
-                feedbackDiv.innerHTML = `<span class="message success">✨ PARABÉNS! VOCÊ COMPLETOU TODOS OS 5 NÍVEIS! ✨</span>`;
-                nextLevelBtn.disabled = true;
-                levelCompleted = true;
-            }
-        } else {
-            feedbackDiv.innerHTML = `<span class="message error">⚠️ Ainda faltam ${remainingCount} erros! Encontre todos os círculos.</span>`;
-        }
+        if (currentLevel + 1 < levels.length) loadLevel(currentLevel + 1);
     }
 
     function resetGame() {
-        hideCongrats();
-        stopPulseAnimation();
-        loadLevel(0);
-    }
-
-    function initCanvasDimensions() {
-        canvasCorrect.width = 700;
-        canvasCorrect.height = 500;
-        canvasErros.width = 700;
-        canvasErros.height = 500;
+        hideCongrats(); stopPulseAnimation(); loadLevel(0);
     }
 
     function attachEvents() {
         canvasErros.addEventListener('click', handleCanvasClick);
         canvasErros.addEventListener('touchstart', (e) => {
             e.preventDefault();
-            const touch = e.touches[0];
-            handleCanvasClick({ clientX: touch.clientX, clientY: touch.clientY });
-        });
+            handleCanvasClick({ clientX: e.touches[0].clientX, clientY: e.touches[0].clientY, touches: e.touches });
+        }, { passive: false }); 
         nextLevelBtn.addEventListener('click', nextLevel);
         resetBtn.addEventListener('click', resetGame);
         forceHelpBtn.addEventListener('click', toggleCircles);
@@ -634,11 +621,13 @@ else
         congratsResetBtn.addEventListener('click', resetFromCongrats);
     }
 
-    function init() {
-        initCanvasDimensions();
+    function initGameEngine() {
+        canvasCorrect.width = 700; canvasCorrect.height = 500;
+        canvasErros.width = 700; canvasErros.height = 500;
         attachEvents();
         loadLevel(0);
     }
 
-    init();
+    // Inicia o questionário
+    initQuestionnaire();
 })();
