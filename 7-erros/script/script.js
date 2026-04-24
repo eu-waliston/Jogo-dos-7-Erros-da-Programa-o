@@ -228,6 +228,24 @@ else
     let pulseAnimationId = null;
     let pulseActive = false;
 
+    // --- CONFIGURAÇÕES POR PERFIL ---
+    const profileConfig = {
+        mago: { maxErrors: 5, useCanvas: false, useScratch: true, difficulty: 'beginner' },
+        hacker: { maxErrors: 7, useCanvas: true, useScratch: false, difficulty: 'intermediate' },
+        detetive: { maxErrors: 7, useCanvas: true, useScratch: false, difficulty: 'advanced' }
+    };
+
+    // --- DADOS DOS BLOCOS SCRATCH (Mago) ---
+    const scratchBlocksData = {
+        olhos: "👀 Abrir os olhos",
+        pijama: "👕 Tirar o pijama",
+        meia: "🧦 Colocar meia primeiro",
+        lanche: "🥪 Comer lanche",
+        pasta: "🪥 Usar pasta de dente",
+        mochila: "🎒 Pegar a mochila",
+        escola: "🏫 Ir para a escola"
+    };
+
     // Elementos DOM
     const canvasCorrect = document.getElementById('canvasCorrect');
     const canvasErros = document.getElementById('canvasErros');
@@ -241,6 +259,7 @@ else
     const feedbackDiv = document.getElementById('feedbackMsg');
     const nextLevelBtn = document.getElementById('nextLevelBtn');
     const resetBtn = document.getElementById('resetBtn');
+    const backToMenuBtn = document.getElementById('backToMenuBtn');
     const forceHelpBtn = document.getElementById('forceHelpBtn');
 
     const congratsOverlay = document.getElementById('congratsOverlay');
@@ -254,43 +273,64 @@ else
     let pulseFrame = 0;
     let pulseDirection = 1;
 
+    // ========== GERENCIADOR DE ESTADO DO JOGO ==========
+    const gameState = {
+        profileSelected: false,
+        currentProfile: null,
+        currentLevel: 0,
+        isGameStarted: false,
+        canBackToMenu: true
+    };
+
     // --- SETUP DO QUESTIONÁRIO INICIAL ---
     function initQuestionnaire() {
         const overlay = document.createElement('div');
         overlay.id = 'profileOverlay';
-        overlay.style.cssText = `
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(1, 4, 9, 0.95); z-index: 9999;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            color: white; font-family: 'Courier New', Courier, monospace; text-align: center;
-        `;
+        overlay.className = 'profile-selector-overlay';
         
         overlay.innerHTML = `
-            <h1 style="color: #22c55e; margin-bottom: 10px;">INICIANDO SISTEMA...</h1>
-            <p style="margin-bottom: 30px; font-size: 18px;">Selecione o seu perfil de depuração de código:</p>
-            
-            <div style="display: flex; gap: 20px; flex-wrap: wrap; justify-content: center;">
-                <button class="profile-btn" data-profile="hacker" style="padding: 15px 25px; font-size: 16px; cursor: pointer; background: #052e16; color: #22c55e; border: 2px solid #22c55e; border-radius: 8px; transition: 0.3s;">
-                    💻 Hacker de Elite
-                </button>
-                <button class="profile-btn" data-profile="mago" style="padding: 15px 25px; font-size: 16px; cursor: pointer; background: #2e1065; color: #a855f7; border: 2px solid #a855f7; border-radius: 8px; transition: 0.3s;">
-                    🧙‍♂️ Mago do Código
-                </button>
-                <button class="profile-btn" data-profile="detetive" style="padding: 15px 25px; font-size: 16px; cursor: pointer; background: #431407; color: #f97316; border: 2px solid #f97316; border-radius: 8px; transition: 0.3s;">
-                    🕵️ Detetive Cibernético
-                </button>
+            <div class="profile-selector-container">
+                <div class="selector-header">
+                    <h1>🐞 JOGO DOS 7 ERROS DA PROGRAMAÇÃO</h1>
+                    <p>Escolha seu caminho e comece a aventura!</p>
+                </div>
+                
+                <div class="profiles-grid">
+                    <div class="profile-card" data-profile="mago">
+                        <div class="profile-icon">🧙‍♂️</div>
+                        <h2>Mago do Código</h2>
+                        <p class="age-range">12-13 anos • Iniciante</p>
+                        <p class="mechanics">🎮 Blocos Scratch<br>Lógica Simples<br>4-5 Erros</p>
+                        <div class="card-footer">Proteja os feitiços do Goblin!</div>
+                    </div>
+                    
+                    <div class="profile-card" data-profile="hacker">
+                        <div class="profile-icon">💻</div>
+                        <h2>Hacker de Elite</h2>
+                        <p class="age-range">14-15 anos • Intermediário</p>
+                        <p class="mechanics">🔍 Análise de Código<br>Python & HTML<br>6-7 Erros</p>
+                        <div class="card-footer">Debug o Vírus Glitch!</div>
+                    </div>
+                    
+                    <div class="profile-card" data-profile="detetive">
+                        <div class="profile-icon">🕵️</div>
+                        <h2>Detetive Cibernético</h2>
+                        <p class="age-range">16-18 anos • Avançado</p>
+                        <p class="mechanics">⚡ Debugging Avançado<br>Lógica Complexa<br>7 Erros</p>
+                        <div class="card-footer">Encontre o Falsificador!</div>
+                    </div>
+                </div>
             </div>
         `;
         
         document.body.appendChild(overlay);
 
-        document.querySelectorAll('.profile-btn').forEach(btn => {
-            btn.addEventListener('mouseenter', e => e.target.style.transform = 'scale(1.05)');
-            btn.addEventListener('mouseleave', e => e.target.style.transform = 'scale(1)');
-            
-            btn.addEventListener('click', (e) => {
-                const profileKey = e.target.getAttribute('data-profile');
+        document.querySelectorAll('.profile-card').forEach(card => {
+            card.addEventListener('click', (e) => {
+                const profileKey = card.getAttribute('data-profile');
                 currentProfile = profiles[profileKey];
+                gameState.profileSelected = true;
+                gameState.currentProfile = profileKey;
                 
                 overlay.style.opacity = '0';
                 setTimeout(() => {
@@ -298,6 +338,9 @@ else
                     initGameEngine(); 
                 }, 300);
             });
+            
+            card.addEventListener('mouseenter', () => card.style.transform = 'translateY(-10px)');
+            card.addEventListener('mouseleave', () => card.style.transform = 'translateY(0)');
         });
     }
 
@@ -409,107 +452,175 @@ else
         }
     }
 
-    function showCongrats() {
-        const level = levels[currentLevel];
-        // TELA DE VITÓRIA USANDO O TÍTULO DA HISTÓRIA
-        congratsLevelName.innerText = `${level.language} - ${currentProfile.levelNames[currentLevel]}`;
-        congratsAttempts.innerText = attempts;
-        congratsHelpUsed.innerText = helpUsedCount;
-        errorsListContainer.innerHTML = '';
-        currentErrors.forEach((err, index) => {
-            const errorDiv = document.createElement('div');
-            errorDiv.className = 'error-item';
-            errorDiv.innerHTML = `<div class="error-number">${index + 1}</div><div class="error-text">${err.explanation}</div>`;
-            errorsListContainer.appendChild(errorDiv);
-        });
-        congratsOverlay.classList.remove('hidden');
-    }
-
-    function hideCongrats() { congratsOverlay.classList.add('hidden'); }
-
-    function nextLevelFromCongrats() {
-        hideCongrats();
-        if (currentLevel + 1 < levels.length) {
-            loadLevel(currentLevel + 1);
-        } else {
-            feedbackDiv.innerHTML = `<span class="message success">✨ FIM DE JOGO! VOCÊ COMPLETOU TODAS AS MISSÕES COMO ${currentProfile.name.toUpperCase()}! ✨</span>`;
-            nextLevelBtn.disabled = true;
-            levelCompleted = true;
+        function showCongrats() {
+            const level = levels[currentLevel];
+            // TELA DE VITÓRIA USANDO O TÍTULO DA HISTÓRIA
+            congratsLevelName.innerText = `${level.language} - ${currentProfile.levelNames[currentLevel]}`;
+            congratsAttempts.innerText = attempts;
+            congratsHelpUsed.innerText = helpUsedCount;
+            errorsListContainer.innerHTML = '';
+            currentErrors.forEach((err, index) => {
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'error-item';
+                errorDiv.innerHTML = `<div class="error-number">${index + 1}</div><div class="error-text">${err.explanation}</div>`;
+                errorsListContainer.appendChild(errorDiv);
+            });
+            congratsOverlay.classList.remove('hidden');
         }
-    }
 
-    function resetFromCongrats() {
-        hideCongrats();
-        loadLevel(0);
-    }
+        function hideCongrats() { congratsOverlay.classList.add('hidden'); }
 
-    function drawCodeAndGetPositions(ctx, codeText) {
-        const w = ctx.canvas.width, h = ctx.canvas.height;
-        ctx.clearRect(0, 0, w, h);
-        ctx.fillStyle = "#010409";
-        ctx.fillRect(0, 0, w, h);
-        ctx.font = "20px 'Fira Code', 'Courier New', monospace";
-        ctx.textBaseline = "top";
-
-        const lines = codeText.split('\n');
-        let y = 40;
-        const linePositions = [];
-
-        for (let i = 0; i < lines.length; i++) {
-            ctx.fillStyle = "#e6edf3";
-            ctx.fillText(lines[i], 35, y);
-            linePositions.push({ lineIndex: i, y: y, x: 35, text: lines[i] });
-            y += 32;
-        }
-        return linePositions;
-    }
-
-    function updateErrorPositions(linePositions) {
-        for (let i = 0; i < currentErrors.length; i++) {
-            const err = currentErrors[i];
-            const lineInfo = linePositions.find(lp => lp.lineIndex === err.line);
-            if (lineInfo) {
-                const textBefore = lineInfo.text.substring(0, err.charPos);
-                err.cx = lineInfo.x + ctxErros.measureText(textBefore).width;
-                err.cy = lineInfo.y + 12;
-                err.radius = 14;
+        function nextLevelFromCongrats() {
+            hideCongrats();
+            if (currentLevel + 1 < levels.length) {
+                loadLevel(currentLevel + 1);
+            } else {
+                feedbackDiv.innerHTML = `<span class="message success">✨ FIM DE JOGO! VOCÊ COMPLETOU TODAS AS MISSÕES COMO ${currentProfile.name.toUpperCase()}! ✨</span>`;
+                nextLevelBtn.disabled = true;
+                levelCompleted = true;
             }
         }
-    }
 
-    function renderLevel() { renderLevelWithPulse(0); }
-
-    function activateHelp() {
-        if (!helpActivated && !levelCompleted && wrongAttempts >= 2) {
-            helpActivated = true;
-            showCircles = true;
-            helpUsedCount++;
-            stopPulseAnimation();
-            renderLevel();
-            feedbackDiv.innerHTML = `<span class="message warning">🔆 DICA ATIVADA! Círculos vermelhos mostram onde estão os erros!</span>`;
-            forceHelpBtn.disabled = true;
-            forceHelpBtn.style.opacity = '0.5';
+        function resetFromCongrats() {
+            hideCongrats();
+            loadLevel(0);
         }
-    }
 
-    function handleCanvasClick(e) {
-        if (levelCompleted || !canClick) return;
-        const rect = canvasErros.getBoundingClientRect();
-        let clientX = e.touches ? e.touches[0].clientX : e.clientX;
-        let clientY = e.touches ? e.touches[0].clientY : e.clientY;
-        if (e.touches) e.preventDefault();
+        function drawCodeAndGetPositions(ctx, codeText) {
+            const w = ctx.canvas.width, h = ctx.canvas.height;
+            ctx.clearRect(0, 0, w, h);
+            ctx.fillStyle = "#010409";
+            ctx.fillRect(0, 0, w, h);
+            ctx.font = "20px 'Fira Code', 'Courier New', monospace";
+            ctx.textBaseline = "top";
 
-        let canvasX = (clientX - rect.left) * (canvasErros.width / rect.width);
-        let canvasY = (clientY - rect.top) * (canvasErros.height / rect.height);
+            const lines = codeText.split('\n');
+            let y = 40;
+            const linePositions = [];
 
-        let hitIndex = -1;
-        for (let i = 0; i < currentErrors.length; i++) {
-            const err = currentErrors[i];
-            if (!err.found) {
-                const dist = Math.sqrt(Math.pow(canvasX - err.cx, 2) + Math.pow(canvasY - err.cy, 2));
-                if (dist <= err.radius + 15) { hitIndex = i; break; }
+            for (let i = 0; i < lines.length; i++) {
+                ctx.fillStyle = "#e6edf3";
+                ctx.fillText(lines[i], 35, y);
+                linePositions.push({ lineIndex: i, y: y, x: 35, text: lines[i] });
+                y += 32;
+            }
+            return linePositions;
+        }
+
+        function updateErrorPositions(linePositions) {
+            for (let i = 0; i < currentErrors.length; i++) {
+                const err = currentErrors[i];
+                const lineInfo = linePositions.find(lp => lp.lineIndex === err.line);
+                if (lineInfo) {
+                    const textBefore = lineInfo.text.substring(0, err.charPos);
+                    err.cx = lineInfo.x + ctxErros.measureText(textBefore).width;
+                    err.cy = lineInfo.y + 12;
+                    err.radius = 14;
+                }
             }
         }
+
+        function allowDrop(ev) {
+            ev.preventDefault();
+        }
+
+        function drag(ev) {
+            ev.dataTransfer.setData("text", ev.target.id);
+            ev.dataTransfer.setData("type", ev.target.getAttribute("data-id"));
+        }
+
+        function drop(ev) {
+            ev.preventDefault();
+            
+            if (levelCompleted || !canClick) return;
+            
+            var dataId = ev.dataTransfer.getData("text");
+            var pieceType = ev.dataTransfer.getData("type");
+            var expectedType = ev.target.getAttribute("data-expected");
+
+            attempts++;
+            animateStat(attemptCounterSpan);
+
+            // Verifica se a peça solta é a correta para aquele buraco
+            if (pieceType === expectedType) {
+                var nodeCopy = document.getElementById(dataId).cloneNode(true);
+                nodeCopy.removeAttribute("draggable");
+                
+                ev.target.innerHTML = nodeCopy.innerHTML;
+                ev.target.className = "s-block success"; // Transforma em bloco de sucesso
+                
+                // Marca erro como encontrado no array (para Scratch)
+                const errorIndex = currentErrors.findIndex(e => e.blockId === expectedType);
+                if (errorIndex !== -1) {
+                    currentErrors[errorIndex].found = true;
+                }
+                
+                animateStat(errorsFoundSpan);
+                animateStat(errorsRemainingSpan);
+                
+                const foundCount = currentErrors.filter(e => e.found).length;
+                const remainingCount = currentErrors.filter(e => !e.found).length;
+                
+                errorsFoundSpan.innerText = foundCount;
+                errorsRemainingSpan.innerText = remainingCount;
+                
+                feedbackDiv.innerHTML = `<span class="message success">✨ Correto! ${scratchBlocksData[expectedType]}</span>`;
+                
+                // Esconde a peça original do inventário
+                document.getElementById(dataId).style.visibility = "hidden";
+                
+                // Verifica vitória
+                if (remainingCount === 0 && !levelCompleted) {
+                    levelCompleted = true;
+                    canClick = false;
+                    setTimeout(() => showCongrats(), 500);
+                }
+            } else {
+                // Se errar, dá uma tremidinha
+                wrongAttempts++;
+                animateStat(errorCountSpan);
+                ev.target.style.animation = "errorShake 0.5s ease";
+                setTimeout(() => ev.target.style.animation = "", 500);
+                feedbackDiv.innerHTML = `<span class="message error">❌ Errado! Esta peça não se encaixa aqui.</span>`;
+            }
+            
+            canClick = false;
+            setTimeout(() => { if (!levelCompleted) canClick = true; }, 300);
+        }
+
+        function renderLevel() { renderLevelWithPulse(0); }
+
+        function activateHelp() {
+            if (!helpActivated && !levelCompleted && wrongAttempts >= 2) {
+                helpActivated = true;
+                showCircles = true;
+                helpUsedCount++;
+                stopPulseAnimation();
+                renderLevel();
+                feedbackDiv.innerHTML = `<span class="message warning">🔆 DICA ATIVADA! Círculos vermelhos mostram onde estão os erros!</span>`;
+                forceHelpBtn.disabled = true;
+                forceHelpBtn.style.opacity = '0.5';
+            }
+        }
+
+        function handleCanvasClick(e) {
+            if (levelCompleted || !canClick) return;
+            const rect = canvasErros.getBoundingClientRect();
+            let clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            let clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            if (e.touches) e.preventDefault();
+
+            let canvasX = (clientX - rect.left) * (canvasErros.width / rect.width);
+            let canvasY = (clientY - rect.top) * (canvasErros.height / rect.height);
+
+            let hitIndex = -1;
+            for (let i = 0; i < currentErrors.length; i++) {
+                const err = currentErrors[i];
+                if (!err.found) {
+                    const dist = Math.sqrt(Math.pow(canvasX - err.cx, 2) + Math.pow(canvasY - err.cy, 2));
+                    if (dist <= err.radius + 15) { hitIndex = i; break; }
+                }
+            }
 
         attempts++;
         animateStat(attemptCounterSpan);
@@ -554,22 +665,77 @@ else
         }
     }
 
+    function loadScratchBlocks() {
+        // Reseta visibilidade dos blocos para o novo nível
+        const blockIds = ['correto1', 'correto2', 'correto3', 'correto4', 'correto5', 'correto6', 'correto7'];
+        blockIds.forEach(id => {
+            const block = document.getElementById(id);
+            if (block) {
+                block.style.visibility = 'visible';
+            }
+        });
+        
+        // Limpa as dropzones
+        const dropzones = document.querySelectorAll('.dropzone.error');
+        dropzones.forEach(zone => {
+            zone.innerHTML = zone.getAttribute('data-expected') === 'olhos' ? 'Dormir mais 😴' :
+                            zone.getAttribute('data-expected') === 'pijama' ? 'Sair de pijama 💤' :
+                            zone.getAttribute('data-expected') === 'meia' ? 'Sapato sem meia 👟' :
+                            zone.getAttribute('data-expected') === 'lanche' ? 'Comer o prato 🍽️' :
+                            zone.getAttribute('data-expected') === 'pasta' ? 'Lavar com suco 🥤' :
+                            zone.getAttribute('data-expected') === 'mochila' ? 'Levar o gato 🐱' :
+                            zone.getAttribute('data-expected') === 'escola' ? 'Ir para o parque 🎡' : zone.innerHTML;
+            zone.className = 's-block error';
+        });
+    }
+
     function loadLevel(levelIndex) {
         const levelData = levels[levelIndex];
+        const config = profileConfig[gameState.currentProfile];
+        
         thief.active = true;
         thief.x = -60;
         thief.y = 40 + (Math.floor(Math.random() * levelData.correctCode.split("\n").length) * 32);
         
         currentWrongCode = levelData.correctCode;
-        setTimeout(() => { startThiefAnimation(); }, 800);
-
-        currentErrors = levelData.errors.map((err, idx) => ({
-            id: idx, line: err.line, charPos: err.charPos, explanation: err.explanation, found: false, cx: 0, cy: 0, radius: 14
-        }));
+        
+        // Carrega blocos Scratch para Mago
+        if (config.useScratch) {
+            loadScratchBlocks();
+            // Cria estrutura de erros para Scratch
+            const blockIds = ['olhos', 'pijama', 'meia', 'lanche', 'pasta', 'mochila', 'escola'];
+            currentErrors = blockIds.slice(0, config.maxErrors).map((blockId, idx) => ({
+                id: idx,
+                blockId: blockId,
+                explanation: `✅ ${scratchBlocksData[blockId]}`,
+                found: false
+            }));
+        } else {
+            setTimeout(() => { startThiefAnimation(); }, 800);
+            
+            // Limita os erros baseado no perfil para Canvas
+            let levelErrors = levelData.errors.slice(0, config.maxErrors);
+            currentErrors = levelErrors.map((err, idx) => ({
+                id: idx, line: err.line, charPos: err.charPos, explanation: err.explanation, found: false, cx: 0, cy: 0, radius: 14
+            }));
+        }
 
         attempts = 0; wrongAttempts = 0; levelCompleted = false; canClick = false; showCircles = false; helpActivated = false; helpUsedCount = 0; currentLevel = levelIndex;
         stopPulseAnimation();
         forceHelpBtn.style.display = 'none';
+
+        // Atualiza UI com base no perfil
+        const areaCanvas = document.getElementById('areaCanvas');
+        const areaScratch = document.getElementById('area-scratch');
+        
+        if (config.useScratch) {
+            if (areaScratch) areaScratch.classList.remove('hidden');
+            if (areaCanvas) areaCanvas.classList.add('hidden');
+            canClick = true; // Scratch pode ser clicado imediatamente
+        } else {
+            if (areaCanvas) areaCanvas.classList.remove('hidden');
+            if (areaScratch) areaScratch.classList.add('hidden');
+        }
 
         renderLevel();
         nextLevelBtn.disabled = true;
@@ -608,6 +774,32 @@ else
         hideCongrats(); stopPulseAnimation(); loadLevel(0);
     }
 
+    function backToMenu() {
+        // Limpar estado do jogo
+        hideCongrats();
+        stopPulseAnimation();
+        levelCompleted = true; // Impedir mais animações
+        canClick = false;
+        thief.active = false;
+        
+        // Remover elementos do jogo
+        const gameContainer = document.querySelector('.game-container');
+        if (gameContainer) gameContainer.style.opacity = '0';
+        
+        setTimeout(() => {
+            // Reiniciar o questionário
+            gameState.profileSelected = false;
+            gameState.currentProfile = null;
+            currentProfile = profiles.detetive; // Reset para valor padrão antes de limpar
+            currentLevel = 0;
+            initQuestionnaire();
+            
+            // Restaurar opacidade
+            const newGameContainer = document.querySelector('.game-container');
+            if (newGameContainer) newGameContainer.style.opacity = '1';
+        }, 300);
+    }
+
     function attachEvents() {
         canvasErros.addEventListener('click', handleCanvasClick);
         canvasErros.addEventListener('touchstart', (e) => {
@@ -616,6 +808,7 @@ else
         }, { passive: false }); 
         nextLevelBtn.addEventListener('click', nextLevel);
         resetBtn.addEventListener('click', resetGame);
+        backToMenuBtn.addEventListener('click', backToMenu);
         forceHelpBtn.addEventListener('click', toggleCircles);
         congratsNextBtn.addEventListener('click', nextLevelFromCongrats);
         congratsResetBtn.addEventListener('click', resetFromCongrats);
@@ -631,3 +824,4 @@ else
     // Inicia o questionário
     initQuestionnaire();
 })();
+

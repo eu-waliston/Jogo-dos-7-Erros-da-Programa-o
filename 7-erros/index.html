@@ -8,73 +8,99 @@
     <link rel="stylesheet" href="style/styles.css">
 </head>
 
-<body>
-  <div class="game-panel">
-        <div class="header">
-            <div class="title">
-                <h1>🐞 JOGO DOS 7 ERROS · DEV</h1>
-                <p>Python | HTML | Dicas visuais pulsantes</p>
+        '    <body>
+                <div class="game-container">
+                    <div class="game-panel">
+                        
+                        <div class="header">
+                            <div class="title">
+                                <h1>🐞 JOGO DOS 7 ERROS · DEV</h1>
+                                <p>Lógica | Python | HTML | Dicas visuais</p>
+                            </div>
+                            <div class="stats">
+                                <div class="stat"><div class="stat-value" id="errorsFound">0</div><div class="stat-label">erros</div></div>
+                                <div class="stat"><div class="stat-value" id="errorsRemaining">7</div><div class="stat-label">restantes</div></div>
+                                <div class="stat"><div class="stat-value" id="attemptCounter">0</div><div class="stat-label">tentativas</div></div>
+                                <div class="stat"><div class="stat-value" id="errorCount">0</div><div class="stat-label">erros/clique</div></div>
+                                <div class="level-badge" id="levelName">LÓGICA BÁSICA</div>
+                            </div>
+                        </div>
+
+                    <div id="area-scratch" class="scratch-container hidden">
+                <div class="inventory">
+                    <h3>🎒 Peças Certas</h3>
+                    <div class="s-block motion" draggable="true" ondragstart="drag(event)" id="correto1" data-id="olhos">👀 Abrir Olhos</div>
+                    <div class="s-block clothes" draggable="true" ondragstart="drag(event)" id="correto2" data-id="pijama">👕 Tirar Pijama</div>
+                    <div class="s-block motion" draggable="true" ondragstart="drag(event)" id="correto3" data-id="meia">🧦 Meia Primeiro</div>
+                    <div class="s-block food" draggable="true" ondragstart="drag(event)" id="correto4" data-id="lanche">🥪 Comer Lanche</div>
+                    <div class="s-block hygiene" draggable="true" ondragstart="drag(event)" id="correto5" data-id="pasta">🪥 Usar Pasta</div>
+                    <div class="s-block items" draggable="true" ondragstart="drag(event)" id="correto6" data-id="mochila">🎒 Minha Mochila</div>
+                    <div class="s-block calendar" draggable="true" ondragstart="drag(event)" id="correto7" data-id="escola">🏫 Ir à Escola</div>
+                </div>
+
+                <div class="robot-script">
+                    <h3>🤖 Rotina do Devzinho</h3>
+                    <div class="s-block start">Ao acordar...</div>
+                    
+                    <div class="dropzone error" ondrop="drop(event)" ondragover="allowDrop(event)" data-expected="olhos">Dormir mais 😴</div>
+                    <div class="dropzone error" ondrop="drop(event)" ondragover="allowDrop(event)" data-expected="pijama">Sair de pijama 💤</div>
+                    <div class="dropzone error" ondrop="drop(event)" ondragover="allowDrop(event)" data-expected="meia">Sapato sem meia 👟</div>
+                    <div class="dropzone error" ondrop="drop(event)" ondragover="allowDrop(event)" data-expected="lanche">Comer o prato 🍽️</div>
+                    <div class="dropzone error" ondrop="drop(event)" ondragover="allowDrop(event)" data-expected="pasta">Lavar com suco 🥤</div>
+                    <div class="dropzone error" ondrop="drop(event)" ondragover="allowDrop(event)" data-expected="mochila">Levar o gato 🐱</div>
+                    <div class="dropzone error" ondrop="drop(event)" ondragover="allowDrop(event)" data-expected="escola">Ir para o parque 🎡</div>
+                    
+                    <div class="s-block end">Fim da rotina</div>
+                </div>
             </div>
-            <div class="stats">
-                <div class="stat"><div class="stat-value" id="errorsFound">0</div><div class="stat-label">erros</div></div>
-                <div class="stat"><div class="stat-value" id="errorsRemaining">7</div><div class="stat-label">restantes</div></div>
-                <div class="stat"><div class="stat-value" id="attemptCounter">0</div><div class="stat-label">tentativas</div></div>
-                <div class="stat"><div class="stat-value" id="errorCount">0</div><div class="stat-label">erros/clique</div></div>
-                <div class="level-badge" id="levelName">INICIANTE</div>
-            </div>
-        </div>
 
-        <div class="canvas-area">
-
-            <div class="code-card">
-                <h3>Código com Erros</h3>
-                <canvas id="canvasErros"></canvas>
+            <div class="canvas-area hidden" id="areaCanvas">
+                <div class="code-card">
+                    <h3>Código com Erros</h3>
+                    <canvas id="canvasErros"></canvas>
+                </div>
+                <div class="code-card">
+                    <h3>Código Correto</h3>
+                    <canvas id="canvasCorrect"></canvas>
+                </div>
             </div>
 
-            <div class="code-card">
-                <h3>Código Correto</h3>
-                <canvas id="canvasCorrect"></canvas>
+            <div class="feedback-area" id="feedbackMsg">
+                <span class="message">🔵 CLIQUE NOS BLOCOS ERRADOS na coluna da esquerda para corrigi-los!</span>
             </div>
 
-        </div>
-
-        <div class="feedback-area" id="feedbackMsg">
-            <span class="message">🔴 CLIQUE NOS CÍRCULOS SUAVES em cima de cada erro!</span>
-        </div>
-
-        <div class="controls">
-            <button id="nextLevelBtn" disabled>➡️ PRÓXIMO NÍVEL</button>
-            <button id="resetBtn" class="reset-btn">🔄 REINICIAR</button>
-            <button id="forceHelpBtn" class="help-btn" disabled style="display: none;">🔘 MOSTRA DICAS (círculos)</button>
+            <div class="controls">
+                <button id="backToMenuBtn" class="back-menu-btn">🏠 VOLTAR AO MENU</button>
+                <button id="nextLevelBtn" disabled>➡️ PRÓXIMO NÍVEL</button>
+                <button id="resetBtn" class="reset-btn">🔄 REINICIAR</button>
+                <button id="forceHelpBtn" class="help-btn" disabled style="display: none;">🔘 MOSTRA DICAS</button>
+            </div>
+            
         </div>
     </div>
-</div>
 
-<!-- TELA DE PARABÉNS -->
-<div id="congratsOverlay" class="congrats-overlay hidden">
-    <div class="congrats-card">
-        <div class="trophy-icon">🏆</div>
-        <h1>PARABÉNS!</h1>
-        <h2 id="congratsLevelName">INICIANTE</h2>
-        <p style="color: #94a3b8;">Você encontrou todos os erros de programação!</p>
-        
-        <div class="errors-list">
-            <h3>📋 ERROS CORRIGIDOS:</h3>
-            <div id="errorsListContainer"></div>
+    <div id="congratsOverlay" class="congrats-overlay hidden">
+        <div class="congrats-card">
+            <div class="trophy-icon">🏆</div>
+            <h1>PARABÉNS!</h1>
+            <h2 id="congratsLevelName">LÓGICA BÁSICA</h2>
+            <p style="color: #94a3b8;">Você corrigiu a rotina maluca do Devzinho!</p>
+            
+            <div class="errors-list">
+                <h3>📋 AÇÕES CORRIGIDAS:</h3>
+                <div id="errorsListContainer"></div>
+            </div>
+            
+            <div style="margin-top: 20px;">
+                <p style="color: #facc15; font-size: 1.2rem;">🎯 Tentativas: <span id="congratsAttempts">0</span></p>
+                <p style="color: #94a3b8; font-size: 0.9rem;">💡 Dicas usadas: <span id="congratsHelpUsed">0</span></p>
+            </div>
+            
+            <button id="congratsNextBtn" class="congrats-btn">➡️ AVANÇAR PARA PRÓXIMO NÍVEL</button>
+            <button id="congratsResetBtn" style="margin-top: 10px; background: #4a2f3d;">🔄 REINICIAR JOGO</button>
         </div>
-        
-        <div style="margin-top: 20px;">
-            <p style="color: #facc15; font-size: 1.2rem;">🎯 Tentativas: <span id="congratsAttempts">0</span></p>
-            <p style="color: #94a3b8; font-size: 0.9rem;">💡 Dicas usadas: <span id="congratsHelpUsed">0</span></p>
-        </div>
-        
-        <button id="congratsNextBtn" class="congrats-btn">➡️ AVANÇAR PARA PRÓXIMO NÍVEL</button>
-        <button id="congratsResetBtn" style="margin-top: 10px; background: #4a2f3d;">🔄 REINICIAR JOGO</button>
     </div>
-</div>
-
 
     <script src="script/script.js"></script>
 </body>
-
 </html>
