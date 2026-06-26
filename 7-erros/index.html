@@ -9,50 +9,50 @@
 </head>
 
 <body>
-                <div class="game-container">
-                    <div class="game-panel">
-                        
-                        <div class="header">
-                            <div class="title">
-                                <h1>🐞 JOGO DOS 7 ERROS · DEV</h1>
-                                <p>Lógica | Python | HTML | Dicas visuais</p>
-                            </div>
-                            <div class="stats">
-                                <div class="stat"><div class="stat-value" id="errorsFound">0</div><div class="stat-label">erros</div></div>
-                                <div class="stat"><div class="stat-value" id="errorsRemaining">7</div><div class="stat-label">restantes</div></div>
-                                <div class="stat"><div class="stat-value" id="attemptCounter">0</div><div class="stat-label">tentativas</div></div>
-                                <div class="stat"><div class="stat-value" id="errorCount">0</div><div class="stat-label">erros/clique</div></div>
-                                <div class="level-badge" id="levelName">LÓGICA BÁSICA</div>
-                            </div>
-                        </div>
+    <div class="game-container">
+        <div class="game-panel">
+            
+            <div class="header">
+                <div class="title">
+                    <h1>🐞 JOGO DOS 7 ERROS · DEV</h1>
+                    <p>Lógica | Python | HTML | Dicas visuais</p>
+                </div>
+                <div class="stats">
+                    <div class="stat"><div class="stat-value" id="errorsFound">0</div><div class="stat-label">erros</div></div>
+                    <div class="stat"><div class="stat-value" id="errorsRemaining">7</div><div class="stat-label">restantes</div></div>
+                    <div class="stat"><div class="stat-value" id="attemptCounter">0</div><div class="stat-label">tentativas</div></div>
+                    <div class="stat"><div class="stat-value" id="errorCount">0</div><div class="stat-label">erros/clique</div></div>
+                    <div class="level-badge" id="levelName">LÓGICA BÁSICA</div>
+                </div>
+            </div>
 
-                        <div id="area-scratch" class="scratch-container hidden">
-                            <div class="inventory">
-                                <h3>🎒 Peças de Reposição</h3>
-                                <div class="s-block motion" draggable="true" ondragstart="drag(event)" id="correto1" data-id="olhos">👀 Abrir Olhos</div>
-                                <div class="s-block clothes" draggable="true" ondragstart="drag(event)" id="correto2" data-id="pijama">👕 Tirar Pijama</div>
-                                <div class="s-block clothes" draggable="true" ondragstart="drag(event)" id="correto3" data-id="uniforme">👔 Vestir Uniforme</div>
-                                <div class="s-block food" draggable="true" ondragstart="drag(event)" id="correto4" data-id="cafe">☕ Tomar Café</div>
-                                <div class="s-block hygiene" draggable="true" ondragstart="drag(event)" id="correto5" data-id="dentes">🪥 Escovar Dentes</div>
-                                <div class="s-block items" draggable="true" ondragstart="drag(event)" id="correto6" data-id="mochila">🎒 Pegar Mochila</div>
-                                <div class="s-block calendar" draggable="true" ondragstart="drag(event)" id="correto7" data-id="escola">🏫 Ir à Escola</div>
-                            </div>
+            <div id="area-scratch" class="scratch-container hidden">
+                <div class="inventory">
+                    <h3>🎒 Peças de Reposição</h3>
+                    <div class="s-block motion" draggable="true" ondragstart="drag(event)" id="correto1" data-id="olhos">👀 Abrir Olhos</div>
+                    <div class="s-block clothes" draggable="true" ondragstart="drag(event)" id="correto2" data-id="pijama">👕 Tirar Pijama</div>
+                    <div class="s-block clothes" draggable="true" ondragstart="drag(event)" id="correto3" data-id="uniforme">👔 Vestir Uniforme</div>
+                    <div class="s-block food" draggable="true" ondragstart="drag(event)" id="correto4" data-id="cafe">☕ Tomar Café</div>
+                    <div class="s-block hygiene" draggable="true" ondragstart="drag(event)" id="correto5" data-id="dentes">🪥 Escovar Dentes</div>
+                    <div class="s-block items" draggable="true" ondragstart="drag(event)" id="correto6" data-id="mochila">🎒 Pegar Mochila</div>
+                    <div class="s-block calendar" draggable="true" ondragstart="drag(event)" id="correto7" data-id="escola">🏫 Ir à Escola</div>
+                </div>
 
-                            <div class="robot-script">
-                                <h3>🤖 Script: Rotina do Devzinho</h3>
-                                <div class="s-block start">Início do Programa</div>
-                                
-                                <div class="dropzone error" ondrop="drop(event)" ondragover="allowDrop(event)" data-expected="olhos">Ficar dormindo 😴</div>
-                                <div class="dropzone error" ondrop="drop(event)" ondragover="allowDrop(event)" data-expected="pijama">Ir para a rua de pijama 💤</div>
-                                <div class="dropzone error" ondrop="drop(event)" ondragover="allowDrop(event)" data-expected="uniforme">Sair de toalha 🛀</div>
-                                <div class="dropzone error" ondrop="drop(event)" ondragover="allowDrop(event)" data-expected="cafe">Comer o guardanapo 🍽️</div>
-                                <div class="dropzone error" ondrop="drop(event)" ondragover="allowDrop(event)" data-expected="dentes">Escovar com suco 🥤</div>
-                                <div class="dropzone error" ondrop="drop(event)" ondragover="allowDrop(event)" data-expected="mochila">Levar o gato na bolsa 🐱</div>
-                                <div class="dropzone error" ondrop="drop(event)" ondragover="allowDrop(event)" data-expected="escola">Ir para o parque 🎡</div>
-                                
-                                <div class="s-block end">Fim do Programa</div>
-                            </div>
-                        </div>
+                <div class="robot-script">
+                    <h3>🤖 Script: Rotina do Devzinho</h3>
+                    <div class="s-block start">Início do Programa</div>
+                    
+                    <div class="dropzone error" ondrop="drop(event)" ondragover="allowDrop(event)" data-expected="olhos">Ficar dormindo 😴</div>
+                    <div class="dropzone error" ondrop="drop(event)" ondragover="allowDrop(event)" data-expected="pijama">Ir para a rua de pijama 💤</div>
+                    <div class="dropzone error" ondrop="drop(event)" ondragover="allowDrop(event)" data-expected="uniforme">Sair de toalha 🛀</div>
+                    <div class="dropzone error" ondrop="drop(event)" ondragover="allowDrop(event)" data-expected="cafe">Comer o guardanapo 🍽️</div>
+                    <div class="dropzone error" ondrop="drop(event)" ondragover="allowDrop(event)" data-expected="dentes">Escovar com suco 🥤</div>
+                    <div class="dropzone error" ondrop="drop(event)" ondragover="allowDrop(event)" data-expected="mochila">Levar o gato na bolsa 🐱</div>
+                    <div class="dropzone error" ondrop="drop(event)" ondragover="allowDrop(event)" data-expected="escola">Ir para o parque 🎡</div>
+                    
+                    <div class="s-block end">Fim do Programa</div>
+                </div>
+            </div>
 
             <div class="canvas-area hidden" id="areaCanvas">
                 <div class="code-card">
@@ -101,6 +101,73 @@
         </div>
     </div>
 
+    <div id="questionnaire-modal" class="questionnaire-modal">
+        <div class="questionnaire-container">
+            
+            <div id="welcome-screen" class="welcome-screen">
+                <div class="questionnaire-header">
+                    <h1>🎮 CALIBRAGEM DE EXPERIÊNCIA</h1>
+                    <p>Como você prefere definir sua jornada pelo código do jogo?</p>
+                </div>
+                <div class="mode-selection-buttons" style="margin-top: 30px; display: flex; flex-direction: column; gap: 15px;">
+                    <button id="btn-choose-quiz" class="questionnaire-btn questionnaire-btn-primary" style="padding: 20px;">
+                        ✨ Responder Questionário Adaptativo <br>
+                        <small style="font-weight: normal; opacity: 0.8;">A IA calibra as vidas, dicas e desafios para você</small>
+                    </button>
+                    <button id="btn-choose-direct" class="questionnaire-btn questionnaire-btn-secondary" style="padding: 20px; border: 2px dashed #4b5563;">
+                        🎯 Escolher Minha Trilha Manualmente <br>
+                        <small style="font-weight: normal; opacity: 0.8;">Eu conheço meu nível e prefiro escolher um perfil</small>
+                    </button>
+                </div>
+            </div>
+
+            <div id="quiz-flow-container" class="hidden">
+                <div class="questionnaire-header">
+                    <h1>🧠 ANALISANDO PERFIL</h1>
+                    <p>Responda com sinceridade para calibrarmos o motor do jogo</p>
+                    <div class="progress-bar">
+                        <div id="progress-fill" class="progress-fill"></div>
+                    </div>
+                    <span id="progress-text" class="progress-text">Pergunta 1/8</span>
+                </div>
+                <div class="questionnaire-content">
+                    <div id="questions-container"></div>
+                </div>
+                <div class="questionnaire-controls" style="margin-top: 20px;">
+                    <button id="questionnaire-prev-btn" class="questionnaire-btn questionnaire-btn-secondary" disabled>⬅️ ANTERIOR</button>
+                    <button id="questionnaire-next-btn" class="questionnaire-btn questionnaire-btn-primary">PRÓXIMO ➡️</button>
+                </div>
+            </div>
+
+            <div id="direct-trail-container" class="hidden">
+                <div class="questionnaire-header">
+                    <h1>👑 SELEÇÃO DE TRILHA</h1>
+                    <p>Clique sobre o card da dificuldade ideal para o seu perfil:</p>
+                </div>
+                <div class="questionnaire-content">
+                    <div id="trail-cards-grid" class="trail-cards-grid" style="margin-top: 20px; display: flex; flex-direction: column; gap: 12px;">
+                        </div>
+                </div>
+                <div class="questionnaire-controls" style="margin-top: 20px; justify-content: flex-start;">
+                    <button id="btn-back-to-welcome" class="questionnaire-btn questionnaire-btn-secondary">⬅️ VOLTAR AO INÍCIO</button>
+                </div>
+            </div>
+
+            <div id="result-screen" class="result-screen hidden">
+                <div class="result-card">
+                    <div class="result-icon" id="result-icon">🎯</div>
+                    <h2 id="result-title">Sua Trilha</h2>
+                    <p id="result-description" class="result-description"></p>
+                    <div id="profile-details" class="profile-details"></div>
+                    <button id="result-confirm-btn" class="result-confirm-btn" style="margin-top: 25px;">🚀 COMEÇAR A AVENTURA</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script src="script/questionnaire.js"></script>
     <script src="script/script.js"></script>
 </body>
+
 </html>

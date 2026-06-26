@@ -276,71 +276,86 @@ else
     const gameState = {
         profileSelected: false,
         currentProfile: null,
+        currentTrail: null,
+        currentTheme: null,
         currentLevel: 0,
         isGameStarted: false,
         canBackToMenu: true
     };
 
-    // --- SETUP DO QUESTIONÁRIO INICIAL ---
-    function initQuestionnaire() {
-        const overlay = document.createElement('div');
-        overlay.id = 'profileOverlay';
-        overlay.className = 'profile-selector-overlay';
-        
-        overlay.innerHTML = `
-            <div class="profile-selector-container">
-                <div class="selector-header">
-                    <h1>🐞 JOGO DOS 7 ERROS DA PROGRAMAÇÃO</h1>
-                    <p>Escolha seu caminho e comece a aventura!</p>
-                </div>
-                
-                <div class="profiles-grid">
-                    <div class="profile-card" data-profile="mago">
-                        <div class="profile-icon">🧙‍♂️</div>
-                        <h2>Mago do Código</h2>
-                        <p class="age-range">12-13 anos • Iniciante</p>
-                        <p class="mechanics">🎮 Blocos Scratch<br>Lógica Simples<br>4-5 Erros</p>
-                        <div class="card-footer">Proteja os feitiços do Goblin!</div>
-                    </div>
-                    
-                    <div class="profile-card" data-profile="hacker">
-                        <div class="profile-icon">💻</div>
-                        <h2>Hacker de Elite</h2>
-                        <p class="age-range">14-15 anos • Intermediário</p>
-                        <p class="mechanics">🔍 Análise de Código<br>Python & HTML<br>6-7 Erros</p>
-                        <div class="card-footer">Debug o Vírus Glitch!</div>
-                    </div>
-                    
-                    <div class="profile-card" data-profile="detetive">
-                        <div class="profile-icon">🕵️</div>
-                        <h2>Detetive Cibernético</h2>
-                        <p class="age-range">16-18 anos • Avançado</p>
-                        <p class="mechanics">⚡ Debugging Avançado<br>Lógica Complexa<br>7 Erros</p>
-                        <div class="card-footer">Encontre o Falsificador!</div>
-                    </div>
-                </div>
-            </div>
-        `;
-        
-        document.body.appendChild(overlay);
+    // --- SETUP DO QUESTIONÁRIO INICIAL COM SISTEMA ADAPTATIVO ---
+    function initAdaptiveQuestionnaire() {
+        const modal = document.getElementById('questionnaire-modal');
+        if (modal) {
+            modal.classList.remove('hidden');
+            modal.style.opacity = '1';
+        }
 
-        document.querySelectorAll('.profile-card').forEach(card => {
-            card.addEventListener('click', (e) => {
-                const profileKey = card.getAttribute('data-profile');
-                currentProfile = profiles[profileKey];
-                gameState.profileSelected = true;
-                gameState.currentProfile = profileKey;
-                
-                overlay.style.opacity = '0';
+        const finalizeSelection = (trail, theme) => {
+            gameState.currentTrail = trail;
+            gameState.currentTheme = theme;
+
+            const trailToProfile = {
+                iniciante: 'mago',
+                explorador: 'detetive',
+                hacker: 'hacker',
+                mestre: 'detetive'
+            };
+
+            const profileKey = trailToProfile[trail] || 'detetive';
+            currentProfile = profiles[profileKey];
+            gameState.profileSelected = true;
+            gameState.currentProfile = profileKey;
+
+            applyTrailAdaptations(trail, theme);
+
+            if (modal) {
+                modal.style.opacity = '0';
                 setTimeout(() => {
-                    document.body.removeChild(overlay);
-                    initGameEngine(); 
+                    modal.classList.add('hidden');
+                    initGameEngine();
                 }, 300);
-            });
+            } else {
+                initGameEngine();
+            }
+        };
+
+        AdaptiveQuestionnaire.setOnCompleteCallback(finalizeSelection);
+        AdaptiveQuestionnaire.init();
+    }
+
+    function applyTrailAdaptations(trail, theme) {
+        // Modificar configurações do perfil baseado na trilha
+        const trailConfig = AdaptiveQuestionnaire.trails[trail];
+        const themeConfig = AdaptiveQuestionnaire.themes[theme];
+        
+        // Guardar adaptações no gameState para uso posterior
+        gameState.trailConfig = trailConfig;
+        gameState.themeConfig = themeConfig;
+        
+        // Adaptar narrativa do perfil
+        if (currentProfile) {
+            currentProfile.trailName = trailConfig.name;
+            currentProfile.themeNarrative = themeConfig;
             
-            card.addEventListener('mouseenter', () => card.style.transform = 'translateY(-10px)');
-            card.addEventListener('mouseleave', () => card.style.transform = 'translateY(0)');
-        });
+            // Adaptar nomes das fases com base no tema
+            applyThemeNarrative(currentProfile, themeConfig);
+        }
+    }
+
+    function applyThemeNarrative(profile, themeConfig) {
+        // Adaptar os nomes das fases com base no tema
+        if (profile.levelNames) {
+            profile.levelNames = profile.levelNames.map((name, idx) => {
+                return `${themeConfig.characters.setting} - ${name}`;
+            });
+        }
+        
+        // Adaptar mensagens de roubo e vitória
+        if (themeConfig.narrative) {
+            profile.stealMsg = themeConfig.narrative.defeat;
+            profile.winMsg = themeConfig.narrative.victory;
+        }
     }
 
     function animateStat(element) {
@@ -808,9 +823,16 @@ else
             // Reiniciar o questionário
             gameState.profileSelected = false;
             gameState.currentProfile = null;
+            gameState.currentTrail = null;
+            gameState.currentTheme = null;
             currentProfile = profiles.detetive; // Reset para valor padrão antes de limpar
             currentLevel = 0;
-            initQuestionnaire();
+            
+            // Limpar localStorage para forçar novo questionário
+            localStorage.removeItem('playerProfile');
+            
+            // Mostrar novo questionário
+            initAdaptiveQuestionnaire();
             
             // Restaurar opacidade
             const newGameContainer = document.querySelector('.game-container');
@@ -839,7 +861,7 @@ else
         loadLevel(0);
     }
 
-    // Inicia o questionário
-    initQuestionnaire();
+    // Inicia o questionário adaptativo
+    initAdaptiveQuestionnaire();
 })();
 
