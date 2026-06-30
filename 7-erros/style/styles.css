@@ -945,6 +945,10 @@
             margin-top: 20px;
         }
 
+        .trail-cards-grid h3, p, small {
+            color: #fff;
+        }
+
         .trail-card {
             position: relative;
             overflow: hidden;
