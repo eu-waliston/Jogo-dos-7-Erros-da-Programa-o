@@ -406,13 +406,14 @@ else
     }
 
     function renderLevelWithPulse(pulseIntensity) {
-        const level = levels[currentLevel];
-        drawCodeAndGetPositions(ctxCorrect, level.correctCode);
+        // O canvas "código correto" não muda durante as animações de
+        // pulso/ladrão, então não precisa ser redesenhado a cada frame.
         const linePositions = drawCodeAndGetPositions(ctxErros, currentWrongCode);
         updateErrorPositions(linePositions);
         drawErrorCircles(ctxErros, pulseIntensity);
 
         // NOME DA FASE ADAPTADO AO PERFIL DA HISTÓRIA
+        const level = levels[currentLevel];
         levelNameSpan.innerText = `${level.language} - ${currentProfile.levelNames[currentLevel]}`;
         
         const foundCount = currentErrors.filter(e => e.found).length;
@@ -775,6 +776,7 @@ else
         }
 
         renderLevel();
+        drawCodeAndGetPositions(ctxCorrect, levelData.correctCode);
         nextLevelBtn.disabled = true;
 
         // FEEDBACK DE INTRODUÇÃO ESPECÍFICO DO NÍVEL E DO PERFIL

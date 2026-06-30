@@ -52,20 +52,105 @@ const AdaptiveQuestionnaire = (function() {
         }
     };
 
-    // ========== QUESTÕES (Reduzidas para o exemplo, mantenha as suas) ==========
+    // ========== QUESTÕES (COMPLETAS) ==========
     const questions = [
+        // Pergunta 1: Experiência com programação
         {
             id: 1, question: 'Você já teve contato com programação?', emoji: '📚',
             options: [
                 { text: 'Nunca', value: 'nunca', scores: { iniciante: 3, explorador: 1, hacker: -2, mestre: -5 } },
+                { text: 'Já vi alguns conceitos', value: 'basico', scores: { iniciante: 1, explorador: 2, hacker: 0, mestre: -1 } },
+                { text: 'Tenho experiência intermediária', value: 'intermediario', scores: { iniciante: -1, explorador: 1, hacker: 3, mestre: 1 } },
                 { text: 'Avançado', value: 'avancado', scores: { iniciante: -3, explorador: 1, hacker: 2, mestre: 3 } }
             ]
         },
+        // Pergunta 2: Estilo de aprendizado
+        {
+            id: 2, question: 'Como você prefere aprender algo novo?', emoji: '🧠',
+            options: [
+                { text: 'Passo a passo com muitos exemplos', value: 'passo', scores: { iniciante: 3, explorador: 1, hacker: -1, mestre: -2 } },
+                { text: 'Explorando por conta própria e descobrindo', value: 'explorar', scores: { iniciante: 0, explorador: 3, hacker: 2, mestre: 1 } },
+                { text: 'Resolvendo problemas práticos diretos', value: 'pratico', scores: { iniciante: -1, explorador: 1, hacker: 3, mestre: 2 } },
+                { text: 'Desafiando-me com problemas complexos', value: 'desafio', scores: { iniciante: -2, explorador: 0, hacker: 2, mestre: 4 } }
+            ]
+        },
+        // Pergunta 3: Preferência de jogos
+        {
+            id: 3, question: 'Que tipo de jogo você mais gosta?', emoji: '🎮',
+            options: [
+                { text: 'Jogos de aventura e história', value: 'aventura', themeScore: { fantasia: 3, misterio: 2, tecnologia: 0, competicao: -1 } },
+                { text: 'Jogos de estratégia e quebra-cabeça', value: 'estrategia', themeScore: { fantasia: 1, misterio: 3, tecnologia: 2, competicao: 2 } },
+                { text: 'Jogos de ação e reflexos', value: 'acao', themeScore: { fantasia: 0, misterio: -1, tecnologia: 2, competicao: 4 } },
+                { text: 'Jogos de simulação e construção', value: 'simulacao', themeScore: { fantasia: 1, misterio: 0, tecnologia: 4, competicao: 1 } }
+            ]
+        },
+        // Pergunta 4: Abordagem a problemas
+        {
+            id: 4, question: 'Quando você enfrenta um erro no código, qual é sua primeira reação?', emoji: '🐛',
+            options: [
+                { text: 'Pânico, peço ajuda imediatamente', value: 'panico', scores: { iniciante: 2, explorador: -1, hacker: -2, mestre: -3 } },
+                { text: 'Leio a mensagem de erro e pesquiso', value: 'pesquisar', scores: { iniciante: 0, explorador: 2, hacker: 1, mestre: 1 } },
+                { text: 'Tento entender a lógica e depurar sozinho', value: 'depurar', scores: { iniciante: -2, explorador: 1, hacker: 3, mestre: 2 } },
+                { text: 'Uso ferramentas e técnicas avançadas', value: 'ferramentas', scores: { iniciante: -3, explorador: 0, hacker: 2, mestre: 4 } }
+            ]
+        },
+        // Pergunta 5: Competitividade
+        {
+            id: 5, question: 'O que você acha de competições de programação?', emoji: '🏁',
+            options: [
+                { text: 'Não gosto, prefiro colaborar', value: 'colaborar', scores: { iniciante: 2, explorador: 1, hacker: 0, mestre: -2 } },
+                { text: 'Acho interessante, mas não participo', value: 'interessado', scores: { iniciante: 0, explorador: 1, hacker: 0, mestre: 1 } },
+                { text: 'Gosto de participar por diversão', value: 'diversao', scores: { iniciante: -1, explorador: 2, hacker: 1, mestre: 1 } },
+                { text: 'Sou viciado em subir rankings', value: 'rank', scores: { iniciante: -3, explorador: 0, hacker: 2, mestre: 4 } }
+            ]
+        },
+        // Pergunta 6: Preferência narrativa
+        {
+            id: 6, question: 'Em um jogo, o que mais te atrai?', emoji: '📖',
+            options: [
+                { text: 'A história e os personagens', value: 'historia', themeScore: { fantasia: 4, misterio: 3, tecnologia: 0, competicao: -1 } },
+                { text: 'Os desafios e mecânicas', value: 'mecanica', themeScore: { fantasia: 0, misterio: 1, tecnologia: 3, competicao: 4 } },
+                { text: 'O mundo e a exploração', value: 'mundo', themeScore: { fantasia: 2, misterio: 2, tecnologia: 2, competicao: 0 } },
+                { text: 'A competição e o ranking', value: 'competicao', themeScore: { fantasia: -1, misterio: -1, tecnologia: 0, competicao: 5 } }
+            ]
+        },
+        // Pergunta 7: Paciência para depuração
+        {
+            id: 7, question: 'Quanto tempo você consegue passar debugando um problema?', emoji: '⏳',
+            options: [
+                { text: 'Pouco tempo, desisto rápido', value: 'pouco', scores: { iniciante: 1, explorador: -1, hacker: -2, mestre: -3 } },
+                { text: 'Até uma hora', value: 'uma_hora', scores: { iniciante: 0, explorador: 1, hacker: 0, mestre: -1 } },
+                { text: 'Horas, até resolver', value: 'horas', scores: { iniciante: -2, explorador: 1, hacker: 3, mestre: 2 } },
+                { text: 'Dias, se necessário', value: 'dias', scores: { iniciante: -3, explorador: 0, hacker: 2, mestre: 4 } }
+            ]
+        },
+        // Pergunta 8: Tema preferido (existente)
         {
             id: 8, question: 'Qual tema você prefere?', emoji: '🎭',
             options: [
                 { text: '🧙 Fantasia e Magia', value: 'fantasia', themeScore: { fantasia: 3, tecnologia: 0, misterio: 0, competicao: 0 } },
-                { text: '💻 Tecnologia e Hackers', value: 'tecnologia', themeScore: { fantasia: 0, tecnologia: 3, misterio: 0, competicao: 1 } }
+                { text: '💻 Tecnologia e Hackers', value: 'tecnologia', themeScore: { fantasia: 0, tecnologia: 3, misterio: 0, competicao: 1 } },
+                { text: '🕵️ Mistério e Investigação', value: 'misterio', themeScore: { fantasia: 0, tecnologia: 0, misterio: 3, competicao: 0 } },
+                { text: '🏆 Competição e Desafio', value: 'competicao', themeScore: { fantasia: 0, tecnologia: 1, misterio: 0, competicao: 3 } }
+            ]
+        },
+        // Pergunta 9: Preferência por teoria vs prática
+        {
+            id: 9, question: 'O que você prefere ao estudar programação?', emoji: '📘',
+            options: [
+                { text: 'Ler teoria e conceitos antes de praticar', value: 'teoria', scores: { iniciante: 2, explorador: 0, hacker: -1, mestre: -1 } },
+                { text: 'Ver exemplos práticos primeiro', value: 'exemplos', scores: { iniciante: 1, explorador: 2, hacker: 1, mestre: 0 } },
+                { text: 'Mergulhar em projetos reais', value: 'projetos', scores: { iniciante: -2, explorador: 1, hacker: 3, mestre: 3 } },
+                { text: 'Resolver muitos exercícios', value: 'exercicios', scores: { iniciante: 0, explorador: 1, hacker: 2, mestre: 1 } }
+            ]
+        },
+        // Pergunta 10: Interesse em história do jogo
+        {
+            id: 10, question: 'Você gosta de imersão narrativa nos jogos?', emoji: '🎭',
+            options: [
+                { text: 'Sim, adoro uma boa história', value: 'sim_historia', themeScore: { fantasia: 3, misterio: 3, tecnologia: 0, competicao: -2 } },
+                { text: 'Um pouco, mas não essencial', value: 'pouco_historia', themeScore: { fantasia: 0, misterio: 1, tecnologia: 2, competicao: 1 } },
+                { text: 'Não, foco só na jogabilidade', value: 'nao_historia', themeScore: { fantasia: -2, misterio: -1, tecnologia: 2, competicao: 4 } }
             ]
         }
     ];
