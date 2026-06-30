@@ -224,8 +224,6 @@ else
     let showCircles = false;
     let helpActivated = false;
     let helpUsedCount = 0;
-    let pulseAnimationId = null;
-    let pulseActive = false;
 
     // --- CONFIGURAÇÕES POR PERFIL ---
     const profileConfig = {
@@ -269,9 +267,6 @@ else
     const congratsNextBtn = document.getElementById('congratsNextBtn');
     const congratsResetBtn = document.getElementById('congratsResetBtn');
 
-    let pulseFrame = 0;
-    let pulseDirection = 1;
-
     // ========== GERENCIADOR DE ESTADO DO JOGO ==========
     const gameState = {
         profileSelected: false,
@@ -303,8 +298,6 @@ else
             };
 
             const profileKey = trailToProfile[trail] || 'detetive';
-            // Clona o perfil original para não acumular prefixos/mensagens
-            // toda vez que o jogador refizer o questionário (bug de mutação).
             currentProfile = Object.assign({}, profiles[profileKey]);
             currentProfile.levelNames = profiles[profileKey].levelNames.slice();
             currentProfile.levelIntros = profiles[profileKey].levelIntros.slice();
@@ -329,33 +322,25 @@ else
     }
 
     function applyTrailAdaptations(trail, theme) {
-        // Modificar configurações do perfil baseado na trilha
         const trailConfig = AdaptiveQuestionnaire.trails[trail];
         const themeConfig = AdaptiveQuestionnaire.themes[theme];
         
-        // Guardar adaptações no gameState para uso posterior
         gameState.trailConfig = trailConfig;
         gameState.themeConfig = themeConfig;
         
-        // Adaptar narrativa do perfil
         if (currentProfile) {
             currentProfile.trailName = trailConfig.name;
             currentProfile.themeNarrative = themeConfig;
-            
-            // Adaptar nomes das fases com base no tema
             applyThemeNarrative(currentProfile, themeConfig);
         }
     }
 
     function applyThemeNarrative(profile, themeConfig) {
-        // Adaptar os nomes das fases com base no tema
         if (profile.levelNames) {
             profile.levelNames = profile.levelNames.map((name, idx) => {
                 return `${themeConfig.characters.setting} - ${name}`;
             });
         }
-        
-        // Adaptar mensagens de roubo e vitória
         if (themeConfig.narrative) {
             profile.stealMsg = themeConfig.narrative.defeat;
             profile.winMsg = themeConfig.narrative.victory;
@@ -368,7 +353,7 @@ else
     }
 
     function updateHelpButton() {
-        if (wrongAttempts >= 1 && !helpActivated && !levelCompleted) {
+        if (wrongAttempts >= 2 && !helpActivated && !levelCompleted) {
             forceHelpBtn.style.display = 'block';
             forceHelpBtn.disabled = false;
             forceHelpBtn.classList.add('visible');
@@ -376,41 +361,14 @@ else
         }
     }
 
-    function startPulseAnimation() {
-        if (pulseActive) return;
-        pulseActive = true;
-        pulseFrame = 0;
-        pulseDirection = 1;
-
-        function animatePulse() {
-            if (!pulseActive || levelCompleted || helpActivated) {
-                pulseActive = false;
-                return;
-            }
-            pulseFrame += 0.05 * pulseDirection;
-            if (pulseFrame >= 1) { pulseFrame = 1; pulseDirection = -1; } 
-            else if (pulseFrame <= 0) { pulseFrame = 0; pulseDirection = 1; }
-            renderLevelWithPulse(pulseFrame);
-            pulseAnimationId = requestAnimationFrame(animatePulse);
-        }
-        pulseAnimationId = requestAnimationFrame(animatePulse);
-    }
-
-    function stopPulseAnimation() {
-        if (pulseAnimationId) {
-            cancelAnimationFrame(pulseAnimationId);
-            pulseAnimationId = null;
-        }
-        pulseActive = false;
-        renderLevel();
-    }
-
-    function renderLevelWithPulse(pulseIntensity) {
-        // O canvas "código correto" não muda durante as animações de
-        // pulso/ladrão, então não precisa ser redesenhado a cada frame.
+    function renderLevel() {
         const linePositions = drawCodeAndGetPositions(ctxErros, currentWrongCode);
         updateErrorPositions(linePositions);
-        drawErrorCircles(ctxErros, pulseIntensity);
+        
+        // Desenha círculos apenas se showCircles estiver ativo
+        if (showCircles) {
+            drawErrorCircles(ctxErros);
+        }
 
         // NOME DA FASE ADAPTADO AO PERFIL DA HISTÓRIA
         const level = levels[currentLevel];
@@ -426,12 +384,11 @@ else
         if (remainingCount === 0 && !levelCompleted) {
             levelCompleted = true;
             canClick = false;
-            stopPulseAnimation();
             showCongrats();
         }
     }
 
-    function drawErrorCircles(ctx, pulseIntensity = 0) {
+    function drawErrorCircles(ctx) {
         if (!canClick && !levelCompleted) return;
 
         for (let i = 0; i < currentErrors.length; i++) {
@@ -461,192 +418,192 @@ else
                 ctx.lineWidth = 1.5;
                 ctx.stroke();
                 ctx.shadowBlur = 0;
-            } else if (pulseIntensity > 0 && wrongAttempts >= 1 && !helpActivated && !err.found) {
-                const opacity = 0.3 + (pulseIntensity * 0.2);
-                ctx.beginPath();
-                ctx.arc(err.cx, err.cy, err.radius + 5 + (pulseIntensity * 8), 0, 2 * Math.PI);
-                ctx.fillStyle = `rgba(255, 100, 0, ${opacity * 0.3})`;
-                ctx.fill();
             }
         }
     }
 
-        function showCongrats() {
-            const level = levels[currentLevel];
-            // TELA DE VITÓRIA USANDO O TÍTULO DA HISTÓRIA
-            congratsLevelName.innerText = `${level.language} - ${currentProfile.levelNames[currentLevel]}`;
-            congratsAttempts.innerText = attempts;
-            congratsHelpUsed.innerText = helpUsedCount;
-            errorsListContainer.innerHTML = '';
-            currentErrors.forEach((err, index) => {
-                const errorDiv = document.createElement('div');
-                errorDiv.className = 'error-item';
-                errorDiv.innerHTML = `<div class="error-number">${index + 1}</div><div class="error-text">${err.explanation}</div>`;
-                errorsListContainer.appendChild(errorDiv);
-            });
-            congratsOverlay.classList.remove('hidden');
+    function showCongrats() {
+        const level = levels[currentLevel];
+        congratsLevelName.innerText = `${level.language} - ${currentProfile.levelNames[currentLevel]}`;
+        congratsAttempts.innerText = attempts;
+        congratsHelpUsed.innerText = helpUsedCount;
+        errorsListContainer.innerHTML = '';
+        currentErrors.forEach((err, index) => {
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'error-item';
+            errorDiv.innerHTML = `<div class="error-number">${index + 1}</div><div class="error-text">${err.explanation}</div>`;
+            errorsListContainer.appendChild(errorDiv);
+        });
+        congratsOverlay.classList.remove('hidden');
+    }
+
+    function hideCongrats() { congratsOverlay.classList.add('hidden'); }
+
+    function nextLevelFromCongrats() {
+        hideCongrats();
+        if (currentLevel + 1 < levels.length) {
+            loadLevel(currentLevel + 1);
+        } else {
+            feedbackDiv.innerHTML = `<span class="message success">✨ FIM DE JOGO! VOCÊ COMPLETOU TODAS AS MISSÕES COMO ${currentProfile.name.toUpperCase()}! ✨</span>`;
+            nextLevelBtn.disabled = true;
+            levelCompleted = true;
         }
+    }
 
-        function hideCongrats() { congratsOverlay.classList.add('hidden'); }
+    function resetFromCongrats() {
+        hideCongrats();
+        loadLevel(0);
+    }
 
-        function nextLevelFromCongrats() {
-            hideCongrats();
-            if (currentLevel + 1 < levels.length) {
-                loadLevel(currentLevel + 1);
-            } else {
-                feedbackDiv.innerHTML = `<span class="message success">✨ FIM DE JOGO! VOCÊ COMPLETOU TODAS AS MISSÕES COMO ${currentProfile.name.toUpperCase()}! ✨</span>`;
-                nextLevelBtn.disabled = true;
+    function drawCodeAndGetPositions(ctx, codeText) {
+        const w = ctx.canvas.width, h = ctx.canvas.height;
+        ctx.clearRect(0, 0, w, h);
+        ctx.fillStyle = "#010409";
+        ctx.fillRect(0, 0, w, h);
+        ctx.font = "20px 'Fira Code', 'Courier New', monospace";
+        ctx.textBaseline = "top";
+
+        const lines = codeText.split('\n');
+        let y = 40;
+        const linePositions = [];
+
+        for (let i = 0; i < lines.length; i++) {
+            ctx.fillStyle = "#e6edf3";
+            ctx.fillText(lines[i], 35, y);
+            linePositions.push({ lineIndex: i, y: y, x: 35, text: lines[i] });
+            y += 32;
+        }
+        return linePositions;
+    }
+
+    function updateErrorPositions(linePositions) {
+        for (let i = 0; i < currentErrors.length; i++) {
+            const err = currentErrors[i];
+            const lineInfo = linePositions.find(lp => lp.lineIndex === err.line);
+            if (lineInfo) {
+                const textBefore = lineInfo.text.substring(0, err.charPos);
+                err.cx = lineInfo.x + ctxErros.measureText(textBefore).width;
+                err.cy = lineInfo.y + 12;
+                err.radius = 14;
+            }
+        }
+    }
+
+    function allowDrop(ev) {
+        ev.preventDefault();
+    }
+
+    function drag(ev) {
+        ev.dataTransfer.setData("text", ev.target.id);
+        ev.dataTransfer.setData("type", ev.target.getAttribute("data-id"));
+    }
+
+    function drop(ev) {
+        ev.preventDefault();
+        
+        if (levelCompleted || !canClick) return;
+        
+        var dataId = ev.dataTransfer.getData("text");
+        var pieceType = ev.dataTransfer.getData("type");
+        var expectedType = ev.target.getAttribute("data-expected");
+
+        attempts++;
+        animateStat(attemptCounterSpan);
+
+        if (pieceType === expectedType) {
+            var nodeCopy = document.getElementById(dataId).cloneNode(true);
+            nodeCopy.removeAttribute("draggable");
+            nodeCopy.removeAttribute("ondragstart");
+            nodeCopy.style.cursor = "default";
+            
+            ev.target.innerHTML = "";
+            ev.target.appendChild(nodeCopy);
+            ev.target.className = "s-block success";
+            ev.target.removeAttribute("ondrop");
+            ev.target.removeAttribute("ondragover");
+            ev.target.removeAttribute("data-expected");
+            
+            const errorIndex = currentErrors.findIndex(e => e.blockId === expectedType);
+            if (errorIndex !== -1) {
+                currentErrors[errorIndex].found = true;
+            }
+            
+            animateStat(errorsFoundSpan);
+            animateStat(errorsRemainingSpan);
+            
+            const foundCount = currentErrors.filter(e => e.found).length;
+            const remainingCount = currentErrors.filter(e => !e.found).length;
+            
+            errorsFoundSpan.innerText = foundCount;
+            errorsRemainingSpan.innerText = remainingCount;
+            
+            feedbackDiv.innerHTML = `<span class="message success">✨ Correto! ${scratchBlocksData[expectedType]}</span>`;
+            
+            document.getElementById(dataId).style.opacity = "0.3";
+            document.getElementById(dataId).style.pointerEvents = "none";
+            
+            if (remainingCount === 0 && !levelCompleted) {
                 levelCompleted = true;
+                canClick = false;
+                setTimeout(() => showCongrats(), 500);
+            }
+        } else {
+            wrongAttempts++;
+            animateStat(errorCountSpan);
+            ev.target.style.animation = "errorShake 0.5s ease";
+            setTimeout(() => ev.target.style.animation = "", 500);
+            feedbackDiv.innerHTML = `<span class="message error">❌ Errado! Esta peça não se encaixa aqui.</span>`;
+        }
+        
+        canClick = false;
+        setTimeout(() => { if (!levelCompleted) canClick = true; }, 300);
+    }
+
+    function activateHelp() {
+        if (!helpActivated && !levelCompleted && wrongAttempts >= 2) {
+            helpActivated = true;
+            showCircles = true;
+            helpUsedCount++;
+            renderLevel();
+            feedbackDiv.innerHTML = `<span class="message warning">🔆 DICA ATIVADA! Círculos vermelhos mostram onde estão os erros!</span>`;
+            forceHelpBtn.disabled = true;
+            forceHelpBtn.style.opacity = '0.5';
+        }
+    }
+
+    function toggleCircles() {
+        if (levelCompleted) return;
+        // Se ainda não ativou a ajuda e já tem 2 erros, ativa
+        if (!helpActivated && wrongAttempts >= 2) {
+            activateHelp();
+        } else if (helpActivated) {
+            // Alterna exibição dos círculos
+            showCircles = !showCircles;
+            renderLevel();
+        } else {
+            // Se ainda não tem erros suficientes, mostra mensagem
+            feedbackDiv.innerHTML = `<span class="message warning">💡 Você precisa errar pelo menos 2 vezes para liberar as dicas.</span>`;
+        }
+    }
+
+    function handleCanvasClick(e) {
+        if (levelCompleted || !canClick) return;
+        const rect = canvasErros.getBoundingClientRect();
+        let clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        let clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        if (e.touches) e.preventDefault();
+
+        let canvasX = (clientX - rect.left) * (canvasErros.width / rect.width);
+        let canvasY = (clientY - rect.top) * (canvasErros.height / rect.height);
+
+        let hitIndex = -1;
+        for (let i = 0; i < currentErrors.length; i++) {
+            const err = currentErrors[i];
+            if (!err.found) {
+                const dist = Math.sqrt(Math.pow(canvasX - err.cx, 2) + Math.pow(canvasY - err.cy, 2));
+                if (dist <= err.radius + 15) { hitIndex = i; break; }
             }
         }
-
-        function resetFromCongrats() {
-            hideCongrats();
-            loadLevel(0);
-        }
-
-        function drawCodeAndGetPositions(ctx, codeText) {
-            const w = ctx.canvas.width, h = ctx.canvas.height;
-            ctx.clearRect(0, 0, w, h);
-            ctx.fillStyle = "#010409";
-            ctx.fillRect(0, 0, w, h);
-            ctx.font = "20px 'Fira Code', 'Courier New', monospace";
-            ctx.textBaseline = "top";
-
-            const lines = codeText.split('\n');
-            let y = 40;
-            const linePositions = [];
-
-            for (let i = 0; i < lines.length; i++) {
-                ctx.fillStyle = "#e6edf3";
-                ctx.fillText(lines[i], 35, y);
-                linePositions.push({ lineIndex: i, y: y, x: 35, text: lines[i] });
-                y += 32;
-            }
-            return linePositions;
-        }
-
-        function updateErrorPositions(linePositions) {
-            for (let i = 0; i < currentErrors.length; i++) {
-                const err = currentErrors[i];
-                const lineInfo = linePositions.find(lp => lp.lineIndex === err.line);
-                if (lineInfo) {
-                    const textBefore = lineInfo.text.substring(0, err.charPos);
-                    err.cx = lineInfo.x + ctxErros.measureText(textBefore).width;
-                    err.cy = lineInfo.y + 12;
-                    err.radius = 14;
-                }
-            }
-        }
-
-        function allowDrop(ev) {
-            ev.preventDefault();
-        }
-
-        function drag(ev) {
-            ev.dataTransfer.setData("text", ev.target.id);
-            ev.dataTransfer.setData("type", ev.target.getAttribute("data-id"));
-        }
-
-        function drop(ev) {
-            ev.preventDefault();
-            
-            if (levelCompleted || !canClick) return;
-            
-            var dataId = ev.dataTransfer.getData("text");
-            var pieceType = ev.dataTransfer.getData("type");
-            var expectedType = ev.target.getAttribute("data-expected");
-
-            attempts++;
-            animateStat(attemptCounterSpan);
-
-            // Verifica se a peça solta é a correta para aquele buraco
-            if (pieceType === expectedType) {
-                var nodeCopy = document.getElementById(dataId).cloneNode(true);
-                nodeCopy.removeAttribute("draggable");
-                nodeCopy.removeAttribute("ondragstart");
-                nodeCopy.style.cursor = "default";
-                
-                ev.target.innerHTML = "";
-                ev.target.appendChild(nodeCopy);
-                ev.target.className = "s-block success"; // Transforma em bloco de sucesso
-                ev.target.removeAttribute("ondrop");
-                ev.target.removeAttribute("ondragover");
-                ev.target.removeAttribute("data-expected");
-                
-                // Marca erro como encontrado no array (para Scratch)
-                const errorIndex = currentErrors.findIndex(e => e.blockId === expectedType);
-                if (errorIndex !== -1) {
-                    currentErrors[errorIndex].found = true;
-                }
-                
-                animateStat(errorsFoundSpan);
-                animateStat(errorsRemainingSpan);
-                
-                const foundCount = currentErrors.filter(e => e.found).length;
-                const remainingCount = currentErrors.filter(e => !e.found).length;
-                
-                errorsFoundSpan.innerText = foundCount;
-                errorsRemainingSpan.innerText = remainingCount;
-                
-                feedbackDiv.innerHTML = `<span class="message success">✨ Correto! ${scratchBlocksData[expectedType]}</span>`;
-                
-                // Esconde a peça original do inventário
-                document.getElementById(dataId).style.opacity = "0.3";
-                document.getElementById(dataId).style.pointerEvents = "none";
-                
-                // Verifica vitória
-                if (remainingCount === 0 && !levelCompleted) {
-                    levelCompleted = true;
-                    canClick = false;
-                    setTimeout(() => showCongrats(), 500);
-                }
-            } else {
-                // Se errar, conta tentativa errada e dá feedback
-                wrongAttempts++;
-                animateStat(errorCountSpan);
-                ev.target.style.animation = "errorShake 0.5s ease";
-                setTimeout(() => ev.target.style.animation = "", 500);
-                feedbackDiv.innerHTML = `<span class="message error">❌ Errado! Esta peça não se encaixa aqui.</span>`;
-            }
-            
-            canClick = false;
-            setTimeout(() => { if (!levelCompleted) canClick = true; }, 300);
-        }
-
-        function renderLevel() { renderLevelWithPulse(0); }
-
-        function activateHelp() {
-            if (!helpActivated && !levelCompleted && wrongAttempts >= 2) {
-                helpActivated = true;
-                showCircles = true;
-                helpUsedCount++;
-                stopPulseAnimation();
-                renderLevel();
-                feedbackDiv.innerHTML = `<span class="message warning">🔆 DICA ATIVADA! Círculos vermelhos mostram onde estão os erros!</span>`;
-                forceHelpBtn.disabled = true;
-                forceHelpBtn.style.opacity = '0.5';
-            }
-        }
-
-        function handleCanvasClick(e) {
-            if (levelCompleted || !canClick) return;
-            const rect = canvasErros.getBoundingClientRect();
-            let clientX = e.touches ? e.touches[0].clientX : e.clientX;
-            let clientY = e.touches ? e.touches[0].clientY : e.clientY;
-            if (e.touches) e.preventDefault();
-
-            let canvasX = (clientX - rect.left) * (canvasErros.width / rect.width);
-            let canvasY = (clientY - rect.top) * (canvasErros.height / rect.height);
-
-            let hitIndex = -1;
-            for (let i = 0; i < currentErrors.length; i++) {
-                const err = currentErrors[i];
-                if (!err.found) {
-                    const dist = Math.sqrt(Math.pow(canvasX - err.cx, 2) + Math.pow(canvasY - err.cy, 2));
-                    if (dist <= err.radius + 15) { hitIndex = i; break; }
-                }
-            }
 
         attempts++;
         animateStat(attemptCounterSpan);
@@ -658,7 +615,6 @@ else
             animateStat(errorsRemainingSpan);
 
             if (currentErrors.filter(e => !e.found).length === 0) {
-                stopPulseAnimation();
                 levelCompleted = true;
                 canClick = false;
                 showCongrats();
@@ -667,12 +623,7 @@ else
         } else {
             wrongAttempts++;
             animateStat(errorCountSpan);
-            if (wrongAttempts === 1 && !helpActivated) {
-                startPulseAnimation();
-                feedbackDiv.innerHTML = `<span class="message warning">🔵 O sistema detectou anomalias... Os erros estão pulsando!</span>`;
-            } else {
-                feedbackDiv.innerHTML = `<span class="message error">❌ Errou! Analise o código com cuidado.</span>`;
-            }
+            feedbackDiv.innerHTML = `<span class="message error">❌ Errou! Analise o código com cuidado.</span>`;
             renderLevel();
             updateHelpButton();
         }
@@ -680,19 +631,7 @@ else
         setTimeout(() => { if (!levelCompleted) canClick = true; }, 300);
     }
 
-    function toggleCircles() {
-        if (levelCompleted) return;
-        if (wrongAttempts >= 2 && !helpActivated) activateHelp();
-        else if (helpActivated) {
-            showCircles = !showCircles;
-            if (!showCircles && wrongAttempts >= 1) startPulseAnimation();
-            else if (showCircles) stopPulseAnimation();
-            renderLevel();
-        }
-    }
-
     function loadScratchBlocks() {
-        // Reseta visibilidade e estado dos blocos para o novo nível
         const blockIds = ['correto1', 'correto2', 'correto3', 'correto4', 'correto5', 'correto6', 'correto7'];
         blockIds.forEach(id => {
             const block = document.getElementById(id);
@@ -705,7 +644,6 @@ else
             }
         });
         
-        // Limpa as dropzones completamente
         const dropzones = document.querySelectorAll('.dropzone.error');
         const dropzoneMap = {
             'olhos': 'Dormir mais 😴',
@@ -737,10 +675,8 @@ else
         
         currentWrongCode = levelData.correctCode;
         
-        // Carrega blocos Scratch para Mago
         if (config.useScratch) {
             loadScratchBlocks();
-            // Cria estrutura de erros para Scratch
             const blockIds = ['olhos', 'pijama', 'meia', 'lanche', 'pasta', 'mochila', 'escola'];
             currentErrors = blockIds.slice(0, config.maxErrors).map((blockId, idx) => ({
                 id: idx,
@@ -751,7 +687,6 @@ else
         } else {
             setTimeout(() => { startThiefAnimation(); }, 800);
             
-            // Limita os erros baseado no perfil para Canvas
             let levelErrors = levelData.errors.slice(0, config.maxErrors);
             currentErrors = levelErrors.map((err, idx) => ({
                 id: idx, line: err.line, charPos: err.charPos, explanation: err.explanation, found: false, cx: 0, cy: 0, radius: 14
@@ -759,17 +694,17 @@ else
         }
 
         attempts = 0; wrongAttempts = 0; levelCompleted = false; canClick = false; showCircles = false; helpActivated = false; helpUsedCount = 0; currentLevel = levelIndex;
-        stopPulseAnimation();
         forceHelpBtn.style.display = 'none';
+        forceHelpBtn.disabled = true;
+        forceHelpBtn.style.opacity = '1';
 
-        // Atualiza UI com base no perfil
         const areaCanvas = document.getElementById('areaCanvas');
         const areaScratch = document.getElementById('area-scratch');
         
         if (config.useScratch) {
             if (areaScratch) areaScratch.classList.remove('hidden');
             if (areaCanvas) areaCanvas.classList.add('hidden');
-            canClick = true; // Scratch pode ser clicado imediatamente
+            canClick = true;
         } else {
             if (areaCanvas) areaCanvas.classList.remove('hidden');
             if (areaScratch) areaScratch.classList.add('hidden');
@@ -779,7 +714,6 @@ else
         drawCodeAndGetPositions(ctxCorrect, levelData.correctCode);
         nextLevelBtn.disabled = true;
 
-        // FEEDBACK DE INTRODUÇÃO ESPECÍFICO DO NÍVEL E DO PERFIL
         feedbackDiv.innerHTML = `<span class="message warning">${currentProfile.levelIntros[currentLevel]}</span>`;
     }
 
@@ -800,8 +734,6 @@ else
         currentWrongCode = levels[currentLevel].wrongCode; 
         canClick = true; 
         renderLevel();
-        
-        // FEEDBACK DE ROUBO ESPECÍFICO DO PERFIL
         feedbackDiv.innerHTML = `<span class="message error">${currentProfile.stealMsg}</span>`;
     }
 
@@ -810,41 +742,34 @@ else
     }
 
     function resetGame() {
-        hideCongrats(); stopPulseAnimation(); loadLevel(0);
+        hideCongrats(); loadLevel(0);
     }
 
     function backToMenu() {
-        // Limpar estado do jogo
         hideCongrats();
-        stopPulseAnimation();
-        levelCompleted = true; // Impedir mais animações
+        levelCompleted = true;
         canClick = false;
         thief.active = false;
         
-        // Remover elementos do jogo
         const gameContainer = document.querySelector('.game-container');
         if (gameContainer) gameContainer.style.opacity = '0';
         
         setTimeout(() => {
-            // Reiniciar o questionário
             gameState.profileSelected = false;
             gameState.currentProfile = null;
             gameState.currentTrail = null;
             gameState.currentTheme = null;
-            currentProfile = profiles.detetive; // Reset para valor padrão antes de limpar
+            currentProfile = profiles.detetive;
             currentLevel = 0;
             
-            // Limpar localStorage para forçar novo questionário
             try {
                 localStorage.removeItem('playerProfile');
             } catch (e) {
                 console.warn('Não foi possível limpar o localStorage:', e);
             }
             
-            // Mostrar novo questionário
             initAdaptiveQuestionnaire();
             
-            // Restaurar opacidade
             const newGameContainer = document.querySelector('.game-container');
             if (newGameContainer) newGameContainer.style.opacity = '1';
         }, 300);
