@@ -365,12 +365,10 @@ else
         const linePositions = drawCodeAndGetPositions(ctxErros, currentWrongCode);
         updateErrorPositions(linePositions);
         
-        // Desenha círculos apenas se showCircles estiver ativo
         if (showCircles) {
             drawErrorCircles(ctxErros);
         }
 
-        // NOME DA FASE ADAPTADO AO PERFIL DA HISTÓRIA
         const level = levels[currentLevel];
         levelNameSpan.innerText = `${level.language} - ${currentProfile.levelNames[currentLevel]}`;
         
@@ -573,15 +571,12 @@ else
 
     function toggleCircles() {
         if (levelCompleted) return;
-        // Se ainda não ativou a ajuda e já tem 2 erros, ativa
         if (!helpActivated && wrongAttempts >= 2) {
             activateHelp();
         } else if (helpActivated) {
-            // Alterna exibição dos círculos
             showCircles = !showCircles;
             renderLevel();
         } else {
-            // Se ainda não tem erros suficientes, mostra mensagem
             feedbackDiv.innerHTML = `<span class="message warning">💡 Você precisa errar pelo menos 2 vezes para liberar as dicas.</span>`;
         }
     }
@@ -768,7 +763,8 @@ else
                 console.warn('Não foi possível limpar o localStorage:', e);
             }
             
-            initAdaptiveQuestionnaire();
+            // Volta para a tela inicial em vez de iniciar o questionário direto
+            showInitialScreen();
             
             const newGameContainer = document.querySelector('.game-container');
             if (newGameContainer) newGameContainer.style.opacity = '1';
@@ -796,6 +792,112 @@ else
         loadLevel(0);
     }
 
-    // Inicia o questionário adaptativo
-    initAdaptiveQuestionnaire();
+    // ========== TELA INICIAL ==========
+    function showInitialScreen() {
+        // Verifica se a tela inicial já existe no DOM, senão a cria
+        let initialScreen = document.getElementById('initial-screen');
+        if (!initialScreen) {
+            initialScreen = document.createElement('div');
+            initialScreen.id = 'initial-screen';
+            initialScreen.className = 'initial-screen';
+            document.body.prepend(initialScreen);
+        }
+
+        // Garante que o modal do questionário esteja oculto
+        const modal = document.getElementById('questionnaire-modal');
+        if (modal) modal.classList.add('hidden');
+
+        // Conteúdo da tela inicial
+        initialScreen.innerHTML = `
+            <div class="initial-content">
+                <h1>🔍 7 Erros de Programação</h1>
+                <p>Encontre os erros no código e torne-se um mestre!</p>
+                <button id="play-button">▶ Play</button>
+            </div>
+        `;
+
+        // Estilos básicos (caso não existam no CSS)
+        const styleId = 'initial-screen-style';
+        if (!document.getElementById(styleId)) {
+            const style = document.createElement('style');
+            style.id = styleId;
+            style.textContent = `
+                .initial-screen {
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    background: linear-gradient(135deg, #0d1117, #161b22);
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    z-index: 9999;
+                    color: #e6edf3;
+                    font-family: 'Segoe UI', system-ui, sans-serif;
+                }
+                .initial-screen .initial-content {
+                    text-align: center;
+                    max-width: 600px;
+                    padding: 2rem;
+                }
+                .initial-screen h1 {
+                    font-size: 4rem;
+                    font-weight: 800;
+                    background: linear-gradient(135deg, #f97316, #8b5cf6);
+                    -webkit-background-clip: text;
+                    -webkit-text-fill-color: transparent;
+                    margin-bottom: 0.5rem;
+                    text-shadow: 0 0 30px rgba(139, 92, 246, 0.3);
+                }
+                .initial-screen p {
+                    font-size: 1.2rem;
+                    color: #8b949e;
+                    margin-bottom: 2.5rem;
+                }
+                .initial-screen #play-button {
+                    background: linear-gradient(135deg, #22c55e, #16a34a);
+                    border: none;
+                    color: white;
+                    font-size: 1.5rem;
+                    font-weight: bold;
+                    padding: 1rem 3rem;
+                    border-radius: 50px;
+                    cursor: pointer;
+                    transition: all 0.3s ease;
+                    box-shadow: 0 4px 15px rgba(34, 197, 94, 0.4);
+                    letter-spacing: 1px;
+                }
+                .initial-screen #play-button:hover {
+                    transform: scale(1.05);
+                    box-shadow: 0 6px 25px rgba(34, 197, 94, 0.6);
+                }
+                .initial-screen #play-button:active {
+                    transform: scale(0.95);
+                }
+                .hidden {
+                    display: none !important;
+                }
+            `;
+            document.head.appendChild(style);
+        }
+
+        // Remove qualquer classe hidden que possa estar na tela inicial
+        initialScreen.classList.remove('hidden');
+
+        // Evento do botão Play
+        const playBtn = document.getElementById('play-button');
+        if (playBtn) {
+            playBtn.addEventListener('click', function() {
+                initialScreen.classList.add('hidden');
+                initAdaptiveQuestionnaire();
+            });
+        }
+    }
+
+    // ========== INICIALIZAÇÃO ==========
+    // Ao carregar a página, mostra a tela inicial (em vez de iniciar o questionário diretamente)
+    document.addEventListener('DOMContentLoaded', function() {
+        showInitialScreen();
+    });
 })();
