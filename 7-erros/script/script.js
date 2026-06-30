@@ -365,8 +365,12 @@ else
         const linePositions = drawCodeAndGetPositions(ctxErros, currentWrongCode);
         updateErrorPositions(linePositions);
         
+        // SEMPRE desenha as bolinhas verdes para os erros encontrados
+        drawFoundErrors(ctxErros);
+        
+        // Desenha os círculos vermelhos (dicas) apenas se showCircles estiver ativo
         if (showCircles) {
-            drawErrorCircles(ctxErros);
+            drawHintCircles(ctxErros);
         }
 
         const level = levels[currentLevel];
@@ -386,9 +390,8 @@ else
         }
     }
 
-    function drawErrorCircles(ctx) {
-        if (!canClick && !levelCompleted) return;
-
+    // Desenha as bolinhas verdes com "✓" para erros já encontrados (sempre)
+    function drawFoundErrors(ctx) {
         for (let i = 0; i < currentErrors.length; i++) {
             const err = currentErrors[i];
             if (err.found) {
@@ -403,7 +406,16 @@ else
                 ctx.font = "bold 14px monospace";
                 ctx.fillStyle = "white";
                 ctx.fillText("✓", err.cx - 4, err.cy + 5);
-            } else if (showCircles) {
+            }
+        }
+    }
+
+    // Desenha os círculos vermelhos (dicas) apenas se showCircles for true
+    function drawHintCircles(ctx) {
+        if (!canClick && !levelCompleted) return;
+        for (let i = 0; i < currentErrors.length; i++) {
+            const err = currentErrors[i];
+            if (!err.found) {
                 ctx.shadowBlur = 4;
                 ctx.shadowColor = "rgba(255,0,0,0.2)";
                 ctx.beginPath();
@@ -545,6 +557,8 @@ else
                 canClick = false;
                 setTimeout(() => showCongrats(), 500);
             }
+            // Redesenha para mostrar a bolinha verde imediatamente
+            renderLevel();
         } else {
             wrongAttempts++;
             animateStat(errorCountSpan);
@@ -614,7 +628,7 @@ else
                 canClick = false;
                 showCongrats();
             }
-            renderLevel();
+            renderLevel(); // Redesenha para mostrar a bolinha verde
         } else {
             wrongAttempts++;
             animateStat(errorCountSpan);
@@ -763,7 +777,6 @@ else
                 console.warn('Não foi possível limpar o localStorage:', e);
             }
             
-            // Volta para a tela inicial em vez de iniciar o questionário direto
             showInitialScreen();
             
             const newGameContainer = document.querySelector('.game-container');
@@ -794,7 +807,6 @@ else
 
     // ========== TELA INICIAL ==========
     function showInitialScreen() {
-        // Verifica se a tela inicial já existe no DOM, senão a cria
         let initialScreen = document.getElementById('initial-screen');
         if (!initialScreen) {
             initialScreen = document.createElement('div');
@@ -803,11 +815,9 @@ else
             document.body.prepend(initialScreen);
         }
 
-        // Garante que o modal do questionário esteja oculto
         const modal = document.getElementById('questionnaire-modal');
         if (modal) modal.classList.add('hidden');
 
-        // Conteúdo da tela inicial
         initialScreen.innerHTML = `
             <div class="initial-content">
                 <h1>🔍 7 Erros de Programação</h1>
@@ -816,7 +826,6 @@ else
             </div>
         `;
 
-        // Estilos básicos (caso não existam no CSS)
         const styleId = 'initial-screen-style';
         if (!document.getElementById(styleId)) {
             const style = document.createElement('style');
@@ -882,10 +891,8 @@ else
             document.head.appendChild(style);
         }
 
-        // Remove qualquer classe hidden que possa estar na tela inicial
         initialScreen.classList.remove('hidden');
 
-        // Evento do botão Play
         const playBtn = document.getElementById('play-button');
         if (playBtn) {
             playBtn.addEventListener('click', function() {
@@ -896,7 +903,6 @@ else
     }
 
     // ========== INICIALIZAÇÃO ==========
-    // Ao carregar a página, mostra a tela inicial (em vez de iniciar o questionário diretamente)
     document.addEventListener('DOMContentLoaded', function() {
         showInitialScreen();
     });
