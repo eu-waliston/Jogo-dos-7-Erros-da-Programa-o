@@ -22,8 +22,8 @@
             ],
             stealMsg: "💥 MALWARE EXECUTADO! O Glitch criptografou a sintaxe. Acesse os pontos vermelhos para debugar e restaurar a linha de código!",
             winMsg: "✅ DEBUG CONCLUÍDO! O código está limpo.",
-            drawEnemy: (ctx, x, y) => {
-                ctx.fillStyle = profiles.hacker.enemyColor;
+            drawEnemy: function(ctx, x, y) {
+                ctx.fillStyle = this.enemyColor;
                 ctx.fillRect(x, y, 25, 25);
                 ctx.fillStyle = "#010409";
                 ctx.font = "14px monospace";
@@ -51,14 +51,14 @@
             ],
             stealMsg: "💥 ZAP! O Goblin sugou as runas e desestabilizou o feitiço! Conserte os nós mágicos nas linhas!",
             winMsg: "✅ FEITIÇO RESTAURADO! A magia flui perfeitamente.",
-            drawEnemy: (ctx, x, y) => {
-                ctx.fillStyle = profiles.mago.enemyColor;
+            drawEnemy: function(ctx, x, y) {
+                ctx.fillStyle = this.enemyColor;
                 ctx.beginPath();
                 ctx.moveTo(x + 12.5, y);
                 ctx.lineTo(x + 25, y + 25);
                 ctx.lineTo(x, y + 25);
                 ctx.fill();
-                ctx.fillStyle = profiles.mago.enemyEyeColor;
+                ctx.fillStyle = this.enemyEyeColor;
                 ctx.fillRect(x + 8, y + 12, 10, 4);
             }
         },
@@ -83,10 +83,10 @@
             ],
             stealMsg: "💥 CENA DO CRIME ADULTERADA! O Falsificador danificou as provas. Encontre as contradições na sintaxe para desmascará-lo!",
             winMsg: "✅ MISTÉRIO RESOLVIDO! Você encontrou as falhas do criminoso.",
-            drawEnemy: (ctx, x, y) => {
-                ctx.fillStyle = profiles.detetive.enemyColor;
+            drawEnemy: function(ctx, x, y) {
+                ctx.fillStyle = this.enemyColor;
                 ctx.fillRect(x, y, 25, 25);
-                ctx.fillStyle = profiles.detetive.enemyEyeColor;
+                ctx.fillStyle = this.enemyEyeColor;
                 ctx.fillRect(x, y + 6, 25, 8);
                 ctx.fillStyle = "white";
                 ctx.fillRect(x + 4, y + 8, 4, 4);
@@ -303,7 +303,11 @@ else
             };
 
             const profileKey = trailToProfile[trail] || 'detetive';
-            currentProfile = profiles[profileKey];
+            // Clona o perfil original para não acumular prefixos/mensagens
+            // toda vez que o jogador refizer o questionário (bug de mutação).
+            currentProfile = Object.assign({}, profiles[profileKey]);
+            currentProfile.levelNames = profiles[profileKey].levelNames.slice();
+            currentProfile.levelIntros = profiles[profileKey].levelIntros.slice();
             gameState.profileSelected = true;
             gameState.currentProfile = profileKey;
 
@@ -829,7 +833,11 @@ else
             currentLevel = 0;
             
             // Limpar localStorage para forçar novo questionário
-            localStorage.removeItem('playerProfile');
+            try {
+                localStorage.removeItem('playerProfile');
+            } catch (e) {
+                console.warn('Não foi possível limpar o localStorage:', e);
+            }
             
             // Mostrar novo questionário
             initAdaptiveQuestionnaire();
@@ -864,4 +872,3 @@ else
     // Inicia o questionário adaptativo
     initAdaptiveQuestionnaire();
 })();
-

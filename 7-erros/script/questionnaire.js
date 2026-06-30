@@ -112,7 +112,11 @@ const AdaptiveQuestionnaire = (function() {
 
     function saveProfileToLocalStorage(trail, theme) {
         const profile = { trail, theme, completedAt: new Date().toISOString(), responses, scores, themeScores };
-        localStorage.setItem('playerProfile', JSON.stringify(profile));
+        try {
+            localStorage.setItem('playerProfile', JSON.stringify(profile));
+        } catch (e) {
+            console.warn('Não foi possível salvar o perfil no localStorage:', e);
+        }
     }
 
     // ========== GERENCIAMENTO DE FLUXO E DOM ==========
@@ -283,11 +287,23 @@ const AdaptiveQuestionnaire = (function() {
 
     // ========== FUNÇÕES PÚBLICAS ==========
     const init = function() {
-        const savedProfile = localStorage.getItem('playerProfile');
+        let savedProfile = null;
+        try {
+            savedProfile = localStorage.getItem('playerProfile');
+        } catch (e) {
+            console.warn('Não foi possível ler o localStorage:', e);
+        }
+
         if (savedProfile) {
-            const profile = JSON.parse(savedProfile);
-            onQuestionnaireComplete(profile.trail, profile.theme);
-            return;
+            try {
+                const profile = JSON.parse(savedProfile);
+                if (profile && profile.trail && profile.theme) {
+                    onQuestionnaireComplete(profile.trail, profile.theme);
+                    return;
+                }
+            } catch (e) {
+                console.warn('Perfil salvo estava corrompido, iniciando novo questionário:', e);
+            }
         }
 
         showModeSelection();
